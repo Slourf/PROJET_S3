@@ -19,7 +19,7 @@ int main(int argc, char **argv)
 	
 	gtk_window_set_default_size(GTK_WINDOW(MainWindow), 1920, 1080);
 	gtk_window_set_title(GTK_WINDOW(MainWindow), "IRIS by Eye for an eye");
-	gtk_window_set_position(GTK_WIN_POS_CENTER(MainWindow));
+	gtk_window_set_position(GTK_WINDOW(MainWindow), GTK_WIN_POS_CENTER);
 	
 	//Ne rien mettre après ça !
 	
