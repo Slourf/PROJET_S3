@@ -9,6 +9,8 @@ void gtk_window_set_position(GtkWindow *window, GtkWindowPosition position);
 void gtk_container_add(GtkContainer *container, GtkWidget *widget);
 void gtk_label_set_markup (GtkLabel *label, const gchar *str);
 
+void AddBtn(GtkWidget *window);
+
 int main(int argc, char **argv)
 {
 	GtkWidget* MainWindow = NULL;
@@ -26,10 +28,12 @@ int main(int argc, char **argv)
 	gtk_window_set_position(GTK_WINDOW(MainWindow), GTK_WIN_POS_CENTER);
 	
 	Label = gtk_label_new(NULL);
-	gtk_label_set_markup(GTK_LABEL(Label), "<b><big> Ca a pas l'air mais ça a été grave casse couille de faire juste ça !</big></b>");
+	gtk_label_set_markup(GTK_LABEL(Label), "<b><big> Ca a pas l'air mais\n ça a été grave casse couille de faire juste ça !</big></b>");
 
+	AddBtn(MainWindow);
 
 	gtk_container_add(GTK_CONTAINER(MainWindow), Label);
+	
 
 	g_signal_connect(G_OBJECT(MainWindow), "delete-event",
 					G_CALLBACK(gtk_main_quit), NULL);
@@ -44,5 +48,9 @@ int main(int argc, char **argv)
 }
 
 
-
-
+void AddBtn(GtkWidget *window) {
+	GtkWidget *Button;
+	Button  = gtk_button_new_with_label("Quitter");
+	g_signal_connect(G_OBJECT(Button), "clicked", G_CALLBACK(gtk_main_quit), NULL);
+	gtk_container_add(GTK_CONTAINER(window), Button);
+}
