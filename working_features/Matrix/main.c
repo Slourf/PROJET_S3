@@ -83,7 +83,7 @@ SDL_Surface to_black_white(SDL_Surface *img) {
             g *= 0.59f;
             b *= 0.11f;
             float lumi = r + g + b;
-            if (lumi < 255 / 2)
+            if (lumi < 256 / 2)
                 lumi = 0;
             else
                 lumi = 255;
@@ -94,41 +94,46 @@ SDL_Surface to_black_white(SDL_Surface *img) {
     return *img;
 }
 
-int** build_matrix(size_t x, size_t y) {
-    int **mat;
-    mat = malloc(x * sizeof (int *));
+long** build_matrix(size_t x, size_t y) {
+    long **mat;
+    mat = malloc(x * sizeof (long *));
     for (size_t i = 0; i < x; ++i) {
-        mat[i] = malloc(y * sizeof (int));
+        mat[i] = malloc(y * sizeof (long));
     }
     return mat;
 }
 
-void build_img_matrix(SDL_Surface *img, int **mat) {
-    for (int i = 0; i < img->w; ++i) {
-        for (int j = 0; j < img->h; ++j) {
+void build_img_matrix(SDL_Surface *img, long **mat) {
+    for (int i = 0; i < img->h; ++i) {
+        for (int j = 0; j < img->w; ++j) {
             Uint8 r, g, b;
-            Uint32 pixel = getpixel(img, i, j);
+            Uint32 pixel = getpixel(img, j, i);
             SDL_GetRGB(pixel, img->format, &r, &g, &b);
-            mat[i][j] = (int)r / 255;
+			if (r < 128)
+				mat[i][j] = 1;
+			else
+            	mat[i][j] = 0;
         }
     }
 }
 
-void print_dynmat(int **mat, size_t x, size_t y) {
-    for (size_t i = 0; i < x; ++i) {
-        for (size_t j = 0; j < y; ++j)
-            printf("%02d ", mat[i][j]);
+void print_dynmat(long **mat, size_t x, size_t y) {
+    for (size_t i = 0; i < y; ++i) {
+        for (size_t j = 0; j < x; ++j)
+            printf("%ld", mat[i][j]);
         printf("\n");
     }
 }
-
+/*
 
 int border_cut (int **mat, int x, int y) {
     int b = 1; 
-    for (int i = 0; i < mat->w; ++i) {
+    int i = 0;
+    while (i < mat->w && b == 1) {
         int j = 0; 
         while (j < mat->w && b == 1) {
             if (mat[x][y] == 0) {
+
 
 
 int* cut(int **mat) {
@@ -138,7 +143,7 @@ int* cut(int **mat) {
         while (j < mat->w
 
 }
-
+*/
 
 int main() {
 	init_sdl();
@@ -149,7 +154,7 @@ int main() {
 	SDL_Surface *img = load_image(path);
     free(path);
 	display_image(img);
-    int **mat_img = build_matrix(img->w, img->h);
+    long **mat_img = build_matrix(img->w, img->h);
 
     *img = to_black_white(img);
     build_img_matrix(img, mat_img);
