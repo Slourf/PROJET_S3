@@ -124,23 +124,105 @@ void print_dynmat(long **mat, size_t x, size_t y) {
         printf("\n");
     }
 }
-/*
-int border_cut (long **mat, int x, int y) {
-    int b = 0; 
+
+int get_upper_y(long **mat, int width, int height) {
+	int b = 1;
+	int y = 0;
+	int lineY = 0;
+
+	while (b == 1 && y < height) {
+		int x = 0;
+							     
+		while (b == 1 && x < width) {
+			if(mat[x][y] == 1)
+				b = 0;
+			++x;
+		}
+		if (b == 1)
+			++lineY;
+		++y;
+	}
+	return lineY;
+}   
+
+int get_lower_y(long **mat, int width, int height) {
+	int b = 1;
+	int y = height
+	int lineY = height;
+
+	while (b == 1 && y > 0) {
+		int x = 0;
+		
+		while (b == 1 && x < width) {
+			if (mat[x][y] == 1)
+				b = 0;
+			++x;
+		}
+		if (b == 1)
+			--lineY;
+		--y;
+	}
+	return lineY;
+}
+
+int get_upper_x(long **mat, int width, int height) {
+    int b = 1;
     int x = 0;
-	int ligne = 0;
-    while (x < mat->w && b == 0) {
-        int y = 0; 
-        while (y < mat->h && b == 0) {
-            if (mat[x][y] == 1) {
-				b = 1;
-			}
-		if (b == 0)
-			ligne++;
+    int columnX = 0;
+
+    while (b == 1 && x < width) {
+        int y = 0;
+    
+        while (b == 1 && y < hieght) {
+            if(mat[x][y] == 1)
+                b = 0;
+            ++y;
+        }
+        if (b == 1)
+            ++columnX;
+        ++x;
+    }   
+    return columnX;
+}   
+
+int get_lower_x(long **mat, int width, int height) {
+    int b = 1;
+    int x = width
+    int columnX = 0;
+
+    while (b == 1 && x > 0) {
+        int y = 0;
+    
+        while (b == 1 && y < height) {
+            if (mat[x][y] == 1)
+                b = 0;
+            ++y;
+        }
+        if (b == 1)
+            ++columnX;
+        --x;
+    }   
+    return columnX;
+}
+
+
+		
+int border_cut (long **mat, int width, int height) {
+	int b = 1;
+	int y = 0;
+	int lineY = 0;
+	while (b == 1 && y < height) {
+		int x = 0;
+		
+		while (b == 1 && x < width) {
+			if(mat[x][y] == 1)
+				b = 0;
+			else
+				++lineY;
 		}
 	}
 }
-*/
+
 /*
 int* cut(long **mat, int ligne) {
 	long **new_mat = build_matrix(mat->w, mat->h - ligne);
