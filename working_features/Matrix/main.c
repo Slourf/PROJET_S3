@@ -9,6 +9,13 @@
 # include<SDL/SDL_image.h>
 
 
+typedef struct {
+	int x_l;
+	int x_u;
+	int y_l;
+	int y_u;
+} tTuple;
+
 void wait_for_keypressed(void) {
   SDL_Event             event;
   // Infinite loop, waiting for event
@@ -124,23 +131,117 @@ void print_dynmat(long **mat, size_t x, size_t y) {
         printf("\n");
     }
 }
-/*
-int border_cut (long **mat, int x, int y) {
-    int b = 0; 
-    int x = 0;
-	int ligne = 0;
-    while (x < mat->w && b == 0) {
-        int y = 0; 
-        while (y < mat->h && b == 0) {
-            if (mat[x][y] == 1) {
-				b = 1;
-			}
-		if (b == 0)
-			ligne++;
+
+int get_upper_y(long **mat, size_t width, size_t height) {
+	int b = 1;
+	size_t y = 0;
+	size_t lineY = 0;
+
+	while (b == 1 && y < height) {
+		size_t x = 0;
+							     
+		while (b == 1 && x < width) {
+			if(mat[x][y] == 1)
+				b = 0;
+			++x;
 		}
+		if (b == 1)
+			++lineY;
+		++y;
 	}
+	return lineY;
+}   
+
+int get_lower_y(long **mat, size_t width, size_t height) {
+	int b = 1;
+	size_t y = height - 1;
+	size_t lineY = height - 1;
+
+	while (b == 1 && y > 0) {
+		size_t x = 0;
+		
+		while (b == 1 && x < width) {
+			if (mat[x][y] == 1)
+				b = 0;
+			++x;
+		}
+		if (b == 1)
+			--lineY;
+		--y;
+	}
+	return lineY;
 }
-*/
+
+int get_upper_x(long **mat, size_t width, size_t height) {
+    int b = 1;
+    size_t x = 0;
+    size_t columnX = 0;
+
+    while (b == 1 && x < width) {
+        size_t y = 0;
+    
+        while (b == 1 && y < height) {
+            if(mat[x][y] == 1)
+                b = 0;
+            ++y;
+        }
+        if (b == 1)
+            ++columnX;
+        ++x;
+    }   
+    return columnX;
+}   
+
+int get_lower_x(long **mat, size_t width, size_t height) {
+    int b = 1;
+    size_t x = width - 1;
+    size_t columnX = width - 1;
+
+    while (b == 1 && x > 0) {
+        size_t y = 0;
+    
+        while (b == 1 && y < height) {
+            if (mat[x][y] == 1)
+                b = 0;
+            ++y;
+        }
+        if (b == 1)
+           --columnX;
+        --x;
+    }   
+    return columnX;
+}
+
+void copy(long **old_mat, long **new_mat, int x_l, int x_u, int y_l, int y_u) {
+	for (int i = 0; i < (x_l - x_u); ++i) {
+		for(int j = 0 ; j < (y_l - y_u); ++j) {
+			new_mat[i][j] = old_mat[x_u + i][y_u + j];
+		}
+	}   
+}	
+		
+tTuple block_cut (long **mat, size_t width, size_t height) {
+	int y_l = get_lower_y(mat, width, height);
+	int y_u = get_upper_y(mat, width, height);
+	int x_l = get_lower_x(mat, width, height);
+	int x_u = get_upper_x(mat, width, height);
+	
+	tTuple t;
+	t.x_l = x_l;
+	t.x_u = x_u;
+	t.y_l = y_l;
+	t.y_u = y_u;
+	return t;
+}
+
+
+
+int line_cut(long **mat, int width, int height);
+
+
+int char_cut(long **mat, int width, int height);
+
+
 /*
 int* cut(long **mat, int ligne) {
 	long **new_mat = build_matrix(mat->w, mat->h - ligne);
@@ -156,16 +257,20 @@ int main() {
     char *path = malloc(256);
     printf("Veuillez entrer le chemin de votre image : ");
     scanf("%256s", path);
-
+	
 	SDL_Surface *img = load_image(path);
     free(path);
 	display_image(img);
     long **mat_img = build_matrix(img->w, img->h);
-
     *img = to_black_white(img);
     build_img_matrix(img, mat_img);
     print_dynmat(mat_img, img->w, img->h);
-
+	
+	tTuple t = block_cut(mat_img, img->w, img->h);
+	printf("x_l = %d; x_u = %d; y_l = %d; y_u = %d;\n", t.x_l, t.x_u, t.y_l, t.y_u);
+	long **block = build_matrix(t.x_l - t.x_u , t.y_l - t.y_u);
+	copy(mat_img, block, t.x_l, t.x_u, t.y_l, t.y_u);
+	print_dynmat(block, t.x_l - t.x_u , t.y_l - t.y_u);
 	display_image(img);
 	free(img);
 	return 0;
