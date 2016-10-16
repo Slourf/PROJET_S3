@@ -132,13 +132,13 @@ void print_dynmat(long **mat, size_t x, size_t y) {
     }
 }
 
-int get_upper_y(long **mat, size_t width, size_t height) {
+int get_upper_y(long **mat, int width, int height) {
 	int b = 1;
-	size_t y = 0;
-	size_t lineY = 0;
+	int y = 0;
+	int lineY = 0;
 
 	while (b == 1 && y < height) {
-		size_t x = 0;
+		int x = 0;
 							     
 		while (b == 1 && x < width) {
 			if(mat[x][y] == 1)
@@ -152,13 +152,13 @@ int get_upper_y(long **mat, size_t width, size_t height) {
 	return lineY;
 }   
 
-int get_lower_y(long **mat, size_t width, size_t height) {
+int get_lower_y(long **mat, int width, int height) {
 	int b = 1;
-	size_t y = height - 1;
-	size_t lineY = height - 1;
+	int y = height - 1;
+	int lineY = height - 1;
 
-	while (b == 1 && y > 0) {
-		size_t x = 0;
+	while (b == 1 && y >= 0) {
+		int x = 0;
 		
 		while (b == 1 && x < width) {
 			if (mat[x][y] == 1)
@@ -172,13 +172,13 @@ int get_lower_y(long **mat, size_t width, size_t height) {
 	return lineY;
 }
 
-int get_upper_x(long **mat, size_t width, size_t height) {
+int get_upper_x(long **mat, int width, int height) {
     int b = 1;
-    size_t x = 0;
-    size_t columnX = 0;
+    int x = 0;
+    int columnX = 0;
 
     while (b == 1 && x < width) {
-        size_t y = 0;
+        int y = 0;
     
         while (b == 1 && y < height) {
             if(mat[x][y] == 1)
@@ -192,13 +192,13 @@ int get_upper_x(long **mat, size_t width, size_t height) {
     return columnX;
 }   
 
-int get_lower_x(long **mat, size_t width, size_t height) {
+int get_lower_x(long **mat, int width, int height) {
     int b = 1;
-    size_t x = width - 1;
-    size_t columnX = width - 1;
+    int x = width - 1;
+    int columnX = width - 1;
 
-    while (b == 1 && x > 0) {
-        size_t y = 0;
+    while (b == 1 && x >= 0) {
+        int y = 0;
     
         while (b == 1 && y < height) {
             if (mat[x][y] == 1)
@@ -213,14 +213,14 @@ int get_lower_x(long **mat, size_t width, size_t height) {
 }
 
 void copy(long **old_mat, long **new_mat, int x_l, int x_u, int y_l, int y_u) {
-	for (int i = 0; i < (x_l - x_u); ++i) {
-		for(int j = 0 ; j < (y_l - y_u); ++j) {
+	for (int i = 0; i <= (x_l - x_u); ++i) {
+		for(int j = 0 ; j <= (y_l - y_u); ++j) {
 			new_mat[i][j] = old_mat[x_u + i][y_u + j];
 		}
 	}   
 }	
 		
-tTuple block_cut (long **mat, size_t width, size_t height) {
+tTuple block_cut (long **mat, int width, int height) {
 	int y_l = get_lower_y(mat, width, height);
 	int y_u = get_upper_y(mat, width, height);
 	int x_l = get_lower_x(mat, width, height);
@@ -236,7 +236,54 @@ tTuple block_cut (long **mat, size_t width, size_t height) {
 
 
 
-int line_cut(long **mat, int width, int height);
+
+
+long*** line_cut(long **mat, int width, int height) {
+	int y_top = 0;
+	int w = 0;
+	int b = 1;
+	int c = 1;
+	int nbLine = 0;
+	long ***list;
+	for (int y = 0; y < height; ++y) {
+		int x = 0;
+		while (x < width && c == 1) {
+			if (mat[x][y] == 1) {
+				c = 0;
+			}
+			++x;
+		}
+		if(c == 1) {
+			if (w == 1) {
+				y_top = y;
+				w = 0;
+			}
+		}
+		else {
+			if (b == 1) {
+				++nbLine;
+				long **line = build_matrix(width, y - y_top);
+				copy(mat, line, 0, width, y, y_top);
+				list = realloc(list, nbLine * sizeof(long **));
+				list[nbLine - 1] = build_matrix(width, y - y_top);
+				copy(mat, list[nbLine - 1], 0, width, y, y_top);
+			//	print_dynmat(list[nbLine - 1], width, y - y_top);
+				b = 0;
+			}
+		}
+	}
+	return list;
+}
+				
+
+
+
+
+
+
+
+
+
 
 
 int char_cut(long **mat, int width, int height);
@@ -258,6 +305,7 @@ int main() {
     printf("Veuillez entrer le chemin de votre image : ");
     scanf("%256s", path);
 	
+	/*Génération de la matrice*/
 	SDL_Surface *img = load_image(path);
     free(path);
 	display_image(img);
@@ -266,11 +314,16 @@ int main() {
     build_img_matrix(img, mat_img);
     print_dynmat(mat_img, img->w, img->h);
 	
-	tTuple t = block_cut(mat_img, img->w, img->h);
+	/*Premier découpage*/
+	tTuple t = block_cut(mat_img, (int)img->w, (int)img->h);
 	printf("x_l = %d; x_u = %d; y_l = %d; y_u = %d;\n", t.x_l, t.x_u, t.y_l, t.y_u);
-	long **block = build_matrix(t.x_l - t.x_u , t.y_l - t.y_u);
+	long **block = build_matrix(t.x_l - t.x_u + 1, t.y_l - t.y_u + 1);
 	copy(mat_img, block, t.x_l, t.x_u, t.y_l, t.y_u);
-	print_dynmat(block, t.x_l - t.x_u , t.y_l - t.y_u);
+	print_dynmat(block, t.x_l - t.x_u + 1, t.y_l - t.y_u + 1);
+	
+	/*Découpage en ligne*/
+	line_cut(block, t.x_l - t.x_u + 1, t.y_l - t.y_u + 1);
+
 	display_image(img);
 	free(img);
 	return 0;
