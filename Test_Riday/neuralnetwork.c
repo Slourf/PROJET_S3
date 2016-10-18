@@ -10,9 +10,9 @@
 //Number of training examples and nodes in each layer. Easier to define as compiler constants here
 //than dynamically allocating memory at run-time.
 #define NUM_TRAINING 4
- #define NUM_INPUTS 2
- #define NUM_HIDDEN 2
- #define NUM_OUTPUTS 1
+#define NUM_INPUTS 2
+#define NUM_HIDDEN 2
+#define NUM_OUTPUTS 1
 
 
 //Print out the weights of a vector of matrix. The vector/matrix is passed to this function as if it
@@ -33,15 +33,15 @@ int main (int argc, char **argv) {
       {
       {0, 0},
       {0, 1},
-      {1, 0},
-      {1, 1}
+      {1, 1},
+      {1, 0}
            };
       float outputs[NUM_TRAINING][NUM_OUTPUTS] = 
       {
       {0},
       {1},
-      {1},
-      {0}
+      {0},
+      {1}
           };
 	
 	float learningrate = 0.01; //learning rate
