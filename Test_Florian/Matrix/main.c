@@ -19,7 +19,12 @@ typedef struct {
 typedef struct {
 	int x;
 	int y;
-} dim;
+} coord;
+
+typedef struct {
+	coord *coord;
+	int length;
+} tuple;
 
 void wait_for_keypressed(void) {
   SDL_Event             event;
@@ -138,6 +143,14 @@ void print_dynmat(long **mat, size_t x, size_t y) {
     }
 }
 
+void print_dynmat_line(long **mat, size_t x, size_t y_top, size_t y) {
+	for (size_t j = y_top; j < y; ++j) {
+		for (size_t i = 0; i < x; ++i) 
+			printf("%ld", mat[i][j]);
+		printf("\n");
+	}
+}
+
 int get_upper_y(long **mat, int width, int height) {
 	int b = 1;
 	int y = 0;
@@ -247,12 +260,15 @@ tTuple block_cut (long **mat, int width, int height) {
 
 
 
-int line_cut(long **mat, long ***lines, int width, int height) {
+tuple line_cut(long **mat,/* long ***lines,*/ int width, int height) {
 	int y_top = 0;
 	int w = 0;
 	int b = 1;
 	int c = 0;
 	int nbLine = 0;
+
+	coord *list = NULL;
+	tuple t;
 
 	for (int y = 0; y < height; ++y) {
 		int x = 0;
@@ -273,6 +289,10 @@ int line_cut(long **mat, long ***lines, int width, int height) {
 				printf("biatch\n");
                 ++nbLine;
 
+				list = realloc(list, nbLine * sizeof(coord));
+				list[nbLine - 1].x = y_top;
+				list[nbLine - 1].y = y;
+/*
                 long ***lines_realloc = realloc(lines, nbLine * sizeof(long **));
 				if (lines_realloc != NULL)
 					lines = lines_realloc;
@@ -282,7 +302,7 @@ int line_cut(long **mat, long ***lines, int width, int height) {
                 
 				copy(mat, lines[nbLine - 1], width - 1, 0, y + 1, y_top); 
                 printf("size = %d; y_l = %d; y_top = %d;\n", y - y_top, y, y_top);
-                print_dynmat(lines[nbLine - 1], width, 1 + y - y_top);
+                print_dynmat(lines[nbLine - 1], width, 1 + y - y_top);*/
 			}
 			b = 1;
 		}
@@ -290,8 +310,12 @@ int line_cut(long **mat, long ***lines, int width, int height) {
 			if (b == 1) {
 				printf("biatch\n");
 				++nbLine;
+				
+				list = realloc(list, nbLine * sizeof(coord));
+				list[nbLine - 1].x = y_top;
+				list[nbLine - 1].y = y;
 
-				long ***lines_realloc = NULL;
+			/*	long ***lines_realloc = NULL;
 				lines_realloc = realloc(lines, nbLine * sizeof(long **));
 				if (lines_realloc != NULL) {
 					lines = lines_realloc;
@@ -306,13 +330,15 @@ int line_cut(long **mat, long ***lines, int width, int height) {
 				
 				copy(mat, lines[nbLine - 1], width - 1, 0, y, y_top);
 				printf("size = %d; y_l = %d; y_top = %d;\n", y - y_top, y, y_top);
-				print_dynmat(lines[nbLine - 1], width, y - y_top);
+				print_dynmat(lines[nbLine - 1], width, y - y_top);*/
 				b = 0;
 			}
 			w = 1;
 		}
 	}
-	return nbLine;
+	t.coord = list;
+	t.length = nbLine;
+	return t;
 }
 				
 
@@ -362,9 +388,16 @@ int main() {
 	print_dynmat(block, t.x_l - t.x_u + 1, t.y_l - t.y_u + 1);
 	free(mat_img);
 	/*Découpage en ligne*/
-	long ***lines = NULL;
-	int nb_lines = line_cut(block, lines, t.x_l - t.x_u + 1, t.y_l - t.y_u + 1);
-	printf("length = %d\n", nb_lines);
+//	long ***lines = NULL;
+	int width = t.x_l - t.x_u + 1;
+	int height = t.y_l - t.y_u + 1;
+	tuple nb_lines = line_cut(block,/* lines,*/ width, height);
+	printf("length = %d\n", nb_lines.length);
+	for (int i = 0; i < nb_lines.length; ++i) {
+		print_dynmat_line(block, width, nb_lines.coord[i].x, nb_lines.coord[i].y);
+		
+		printf("%d\n", i);
+	}
 
 	display_image(img);
 	free(img);
