@@ -8,11 +8,6 @@
 #define NUM_HIDDEN 2
 #define NUM_OUTPUTS 1
 
- void displayVectorOrMatrix (const char *label, float *m, int rows, int cols)     {
-      printf ("   %s:\n", label);
-      for (int i=0; i<rows*cols; i++) printf ("%10.5f%c", m[i], (cols>1 && i%c    ols==cols-1) ? '\n' : ' ');
-      if (cols==1) printf ("\n");
-  }
   
 
 
@@ -191,11 +186,6 @@ int main (int argc, char **argv)
 		}
 	}
 //Output weights and last input/output and predicted output
-     displayVectorOrMatrix ("input/hidden weights", (float*)Wxh, NUM_INPUTS+1    , NUM_HIDDEN);
-     displayVectorOrMatrix ("hidden/output weights", (float*)Why, NUM_HIDDEN+    1, NUM_OUTPUTS);
-     displayVectorOrMatrix ("last input", &x[1], NUM_INPUTS, 1);
-     displayVectorOrMatrix ("last output", y, NUM_OUTPUTS, 1);
-     displayVectorOrMatrix ("predicted output", probabilities, NUM_OUTPUTS, 1    );
-
+    printf("%f %f %f %f\n", x[0],x[1], y[0],probabilities[0]);
 	return 0;
 }
