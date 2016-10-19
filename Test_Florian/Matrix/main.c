@@ -19,7 +19,12 @@ typedef struct {
 typedef struct {
 	int x;
 	int y;
-} dim;
+} coord;
+
+typedef struct {
+	coord *coord;
+	int length;
+} tuple;
 
 void wait_for_keypressed(void) {
   SDL_Event             event;
@@ -138,6 +143,7 @@ void print_dynmat(long **mat, size_t x, size_t y) {
     }
 }
 
+
 int get_upper_y(long **mat, int width, int height) {
 	int b = 1;
 	int y = 0;
@@ -222,11 +228,10 @@ void copy(long **old_mat, long **new_mat, int x_l, int x_u, int y_l, int y_u) {
 
 	for (int i = 0; i <= (x_l - x_u); ++i) {
 		for(int j = 0 ; j <= (y_l - y_u); ++j) {
-	//		printf("x = %d; y = %d;\n", i, j);
 			new_mat[i][j] = old_mat[x_u + i][y_u + j];
 		}
 	}
-	printf("copy");
+	
 }	
 		
 tTuple block_cut (long **mat, int width, int height) {
@@ -247,16 +252,18 @@ tTuple block_cut (long **mat, int width, int height) {
 
 
 
-int line_cut(long **mat, long ***lines, int width, int height) {
+tuple line_cut(long **mat, int width, int height) {
 	int y_top = 0;
 	int w = 0;
 	int b = 1;
 	int c = 0;
 	int nbLine = 0;
 
+	coord *list = NULL;
+	tuple t;
+
 	for (int y = 0; y < height; ++y) {
 		int x = 0;
-		printf("%d\n", y);
 		c = 0;
 		while (x < width && c == 0) {
 			if (mat[x][y] == 1) {
@@ -269,75 +276,94 @@ int line_cut(long **mat, long ***lines, int width, int height) {
 				y_top = y;
 				w = 0;
 			}
-			if (y + 1 == height) {
-				printf("biatch\n");
-                ++nbLine;
+			if (y + 1 == height){
+        			++nbLine;
 
-                long ***lines_realloc = realloc(lines, nbLine * sizeof(long **));
-				if (lines_realloc != NULL)
-					lines = lines_realloc;
-				free(lines_realloc);
-                lines[nbLine - 1] = build_matrix(width, 1 + y - y_top);
-				 
-                
-				copy(mat, lines[nbLine - 1], width - 1, 0, y + 1, y_top); 
-                printf("size = %d; y_l = %d; y_top = %d;\n", y - y_top, y, y_top);
-                print_dynmat(lines[nbLine - 1], width, 1 + y - y_top);
+				list = realloc(list, nbLine * sizeof(coord));
+				list[nbLine - 1].x = y_top;
+				list[nbLine - 1].y = y;
 			}
 			b = 1;
 		}
 		else {
 			if (b == 1) {
-				printf("biatch\n");
 				++nbLine;
-
-				long ***lines_realloc = NULL;
-				lines_realloc = realloc(lines, nbLine * sizeof(long **));
-				if (lines_realloc != NULL) {
-					lines = lines_realloc;
-					printf("realloc");
-					printf("az = %ld\n", **lines[nbLine - 1]);
-				}
-			//	print_dynmat(lines[nbLine - 1], width, y - y_top);
 				
-				lines[nbLine - 1] = build_matrix(width, y - y_top);
+				list = realloc(list, nbLine * sizeof(coord));
+				list[nbLine - 1].x = y_top;
+				list[nbLine - 1].y = y;
 
-				printf("check");
-				
-				copy(mat, lines[nbLine - 1], width - 1, 0, y, y_top);
-				printf("size = %d; y_l = %d; y_top = %d;\n", y - y_top, y, y_top);
-				print_dynmat(lines[nbLine - 1], width, y - y_top);
 				b = 0;
 			}
 			w = 1;
 		}
 	}
-	return nbLine;
+	t.coord = list;
+	t.length = nbLine;
+	return t;
 }
 				
+void stock_lines(long ***lines, long** img, int width, tuple coord) {
+	for (int i = 0; i < coord.length; ++i) {
+long **m = build_matrix(width, coord.coord[i].y - coord.coord[i].x + 1);
+		copy(img, m, width - 1, 0, coord.coord[i].y, coord.coord[i].x);
+		lines[i] = m;
+	}
+}
 
 
-
-
-
-
-
-
-
-
-
-int char_cut(long **mat, int width, int height);
-
-
-/*
-int* cut(long **mat, int ligne) {
-	long **new_mat = build_matrix(mat->w, mat->h - ligne);
+tuple char_cut(long **mat, int width, int height)  
+{       
+	int x_top = 0;
+	int w = 0;
     int b = 1;
-    for (int i = 0; i < new_mat->w; ++i) {
-        int j = 0;
-        while (j < mat->w
+    int c = 0;
+    int nbchar = 0;
 
-}*/
+    coord *list = NULL;
+    tuple t;
+
+    for (int x = 0; x < width; ++x) {
+		int y = 0;
+        c = 0;
+        while (y < height && c == 0) {
+			if (mat[x][y] == 1) {
+				c = 1;
+        }
+        ++y;
+    	}
+    	if(c == 1) {
+			if (w == 1) {
+				x_top = x;
+            	w = 0;
+        	}
+			if (x + 1 == width){
+				++nbchar;
+
+            	list = realloc(list, nbchar * sizeof(coord));
+            	list[nbchar - 1].x = x_top;
+            	list[nbchar - 1].y = x;
+        	}
+        	b = 1;
+    	}
+    	else {
+			if (b == 1) {
+				++nbchar;
+
+            	list = realloc(list, nbchar * sizeof(coord));
+            	list[nbchar - 1].x = x_top;
+            	list[nbchar - 1].y = x;
+
+            	b = 0;
+        	}
+        	w = 1;
+    	}
+ 	}
+    t.coord = list;
+    t.length = nbchar;
+    return t;
+}
+
 
 int main() {
 	init_sdl();
@@ -352,19 +378,63 @@ int main() {
     long **mat_img = build_matrix(img->w, img->h);
     *img = to_black_white(img);
     build_img_matrix(img, mat_img);
+
+	printf("Affichage de la matrice de l'image :\n\n");
     print_dynmat(mat_img, img->w, img->h);
 	
+
 	/*Premier découpage*/
 	tTuple t = block_cut(mat_img, (int)img->w, (int)img->h);
-	printf("x_l = %d; x_u = %d; y_l = %d; y_u = %d;\n", t.x_l, t.x_u, t.y_l, t.y_u);
 	long **block = build_matrix(t.x_l - t.x_u + 1, t.y_l - t.y_u + 1);
 	copy(mat_img, block, t.x_l, t.x_u, t.y_l, t.y_u);
+
+	printf("Découpage des bords blanc : \n\n");
 	print_dynmat(block, t.x_l - t.x_u + 1, t.y_l - t.y_u + 1);
+
 	free(mat_img);
+
 	/*Découpage en ligne*/
-	long ***lines = NULL;
-	int nb_lines = line_cut(block, lines, t.x_l - t.x_u + 1, t.y_l - t.y_u + 1);
-	printf("length = %d\n", nb_lines);
+	int width = t.x_l - t.x_u + 1;
+	int height = t.y_l - t.y_u + 1;
+	tuple nb_lines = line_cut(block, width, height);
+
+	long ***lines = calloc(nb_lines.length, sizeof(long **));
+	stock_lines(lines, block, width, nb_lines);
+	
+	printf("Decoupage en lignes : \n\n");
+	for (int i = 0; i < nb_lines.length; ++i) {
+		print_dynmat(lines[i],width,nb_lines.coord[i].y-nb_lines.coord[i].x);
+		printf("\n");
+	}
+
+	free(block);
+
+	/*Découpage des caratères*/
+	long ****chat = calloc(nb_lines.length, sizeof(long ***));
+	for (int j = 0; j< nb_lines.length; ++j) {
+		tuple nb_charinline = char_cut(lines[j],width,nb_lines.coord[j].y-nb_lines.coord[j].x+1);
+		long ***line_char = calloc(nb_charinline.length, sizeof(long **));
+		print_dynmat(lines[j],width,nb_lines.coord[j].y-nb_lines.coord[j].x);
+		printf("\n\n");
+		for (int k = 0; k < nb_charinline.length; ++k) {
+			long **m = build_matrix(nb_charinline.coord[k].y-nb_charinline.coord[k].x + 2,
+					nb_lines.coord[j].y - nb_lines.coord[j].x + 2 );
+			printf("x_gauche = %d; x_droite = %d\n", nb_charinline.coord[k].x,
+													 nb_charinline.coord[k].y);
+
+			int y_l = nb_lines.coord[j].y - nb_lines.coord[j].x;
+            copy(lines[j], m, nb_charinline.coord[k].y, nb_charinline.coord[k].x,
+						 y_l, 0);
+            line_char[k] = m;
+			print_dynmat(m,nb_charinline.coord[k].y-nb_charinline.coord[k].x,
+						nb_lines.coord[j].y-nb_lines.coord[j].x);
+            printf("\n");
+
+			chat[j]=line_char;
+        }
+
+
+	}
 
 	display_image(img);
 	free(img);
