@@ -311,7 +311,58 @@ long **m = build_matrix(width, coord.coord[i].y - coord.coord[i].x + 1);
 }
 
 
-int char_cut(long **mat, int width, int height);
+tuple char_cut(long **mat, int width, int height)  
+{       
+  	int x_top = 0;
+        int w = 0;
+        int b = 1;
+        int c = 0;
+        int nbchar = 0;
+
+        coord *list = NULL;
+        tuple t;
+
+        for (int x = 0; x < width; ++x) {
+                int y = 0;
+                c = 0;
+                while (y < height && c == 0) {
+                        if (mat[x][y] == 1) {
+                                c = 1;
+                        }
+                        ++y;
+                }
+                if(c == 1) {
+                        if (w == 1) {
+                                x_top = x;
+                                w = 0;
+                        }
+                        if (x + 1 == width){
+                                ++nbchar;
+
+                                list = realloc(list, nbchar * sizeof(coord));
+                                list[nbchar - 1].x = x_top;
+                                list[nbchar - 1].y = x;
+                        }
+                        b = 1;
+                }
+                else {
+                        if (b == 1) {
+                                ++nbchar;
+
+                                list = realloc(list, nbchar * sizeof(coord));
+                                list[nbchar - 1].x = x_top;
+                                list[nbchar - 1].y = x;
+
+                                b = 0;
+                        }
+                        w = 1;
+                }
+        }
+        t.coord = list;
+        t.length = nbchar;
+        return t;
+}
+
 
 int main() {
 	init_sdl();
@@ -351,14 +402,29 @@ int main() {
 	
 	printf("Decoupage en lignes : \n\n");
 	for (int i = 0; i < nb_lines.length; ++i) {
-		print_dynmat(lines[i],width,nb_lines.coord[i].y-nb_lines.coord[i].x);
+		print_dynmat(lines[i],width,nb_lines.coord[i].y-nb_lines.coord[i].x+1);
 		printf("\n");
 	}
 
 	free(block);
 
 	/*Découpage des caratères*/
+	long ****chat = calloc(nb_lines.length, sizeof(long ***));
+	for (int j = 0; j< nb_lines.length; ++j) {
+		tuple nb_charinline = char_cut(lines[j],width,nb_lines.coord[j].y-nb_lines.coord[j].x+1);
+		long ***line_char = calloc(nb_charinline.length, sizeof(long **));
+		for (int k = 0; k < nb_charinline.length; ++k) {
+			long **m = build_matrix(nb_charinline.coord[k].y-nb_charinline.coord[k].x+2, nb_lines.coord[j].y - nb_lines.coord[j].x+2 );
+                	copy(lines[j], m, nb_charinline.coord[k].y, nb_charinline.coord[k].x, nb_lines.coord[j].y, nb_lines.coord[j].x);
+                	line_char[k] = m;
+			print_dynmat(m,nb_charinline.coord[k].y-nb_charinline.coord[k].x+1,nb_lines.coord[j].y-nb_lines.coord[j].x+1);
+                	printf("\n");
 
+		chat[j]=line_char;
+        }
+
+
+	}
 
 	display_image(img);
 	free(img);
