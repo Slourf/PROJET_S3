@@ -3,6 +3,7 @@
 # include <err.h>
 # include <assert.h>
 # include <math.h>
+# include "ReadAndWrite.h"
 /*
 
 ONLY WORKS FOR XOR FUNCTION
