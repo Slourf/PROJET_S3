@@ -16,6 +16,16 @@ typedef struct {
 	int y_u;
 } tTuple;
 
+typedef struct {
+	int x;
+	int y;
+} coord;
+
+typedef struct {
+	coord *coord;
+	int length;
+} tuple;
+
 void wait_for_keypressed(void) {
   SDL_Event             event;
   // Infinite loop, waiting for event
@@ -108,7 +118,8 @@ long** build_matrix(size_t x, size_t y) {
         mat[i] = malloc(y * sizeof (long));
     }
     return mat;
-}
+}	
+
 
 void build_img_matrix(SDL_Surface *img, long **mat) {
     for (int x = 0; x < img->w; ++x) {
@@ -132,13 +143,14 @@ void print_dynmat(long **mat, size_t x, size_t y) {
     }
 }
 
-int get_upper_y(long **mat, size_t width, size_t height) {
+
+int get_upper_y(long **mat, int width, int height) {
 	int b = 1;
-	size_t y = 0;
-	size_t lineY = 0;
+	int y = 0;
+	int lineY = 0;
 
 	while (b == 1 && y < height) {
-		size_t x = 0;
+		int x = 0;
 							     
 		while (b == 1 && x < width) {
 			if(mat[x][y] == 1)
@@ -152,13 +164,13 @@ int get_upper_y(long **mat, size_t width, size_t height) {
 	return lineY;
 }   
 
-int get_lower_y(long **mat, size_t width, size_t height) {
+int get_lower_y(long **mat, int width, int height) {
 	int b = 1;
-	size_t y = height - 1;
-	size_t lineY = height - 1;
+	int y = height - 1;
+	int lineY = height - 1;
 
-	while (b == 1 && y > 0) {
-		size_t x = 0;
+	while (b == 1 && y >= 0) {
+		int x = 0;
 		
 		while (b == 1 && x < width) {
 			if (mat[x][y] == 1)
@@ -172,13 +184,13 @@ int get_lower_y(long **mat, size_t width, size_t height) {
 	return lineY;
 }
 
-int get_upper_x(long **mat, size_t width, size_t height) {
+int get_upper_x(long **mat, int width, int height) {
     int b = 1;
-    size_t x = 0;
-    size_t columnX = 0;
+    int x = 0;
+    int columnX = 0;
 
     while (b == 1 && x < width) {
-        size_t y = 0;
+        int y = 0;
     
         while (b == 1 && y < height) {
             if(mat[x][y] == 1)
@@ -192,13 +204,13 @@ int get_upper_x(long **mat, size_t width, size_t height) {
     return columnX;
 }   
 
-int get_lower_x(long **mat, size_t width, size_t height) {
+int get_lower_x(long **mat, int width, int height) {
     int b = 1;
-    size_t x = width - 1;
-    size_t columnX = width - 1;
+    int x = width - 1;
+    int columnX = width - 1;
 
-    while (b == 1 && x > 0) {
-        size_t y = 0;
+    while (b == 1 && x >= 0) {
+        int y = 0;
     
         while (b == 1 && y < height) {
             if (mat[x][y] == 1)
@@ -213,14 +225,16 @@ int get_lower_x(long **mat, size_t width, size_t height) {
 }
 
 void copy(long **old_mat, long **new_mat, int x_l, int x_u, int y_l, int y_u) {
-	for (int i = 0; i < (x_l - x_u); ++i) {
-		for(int j = 0 ; j < (y_l - y_u); ++j) {
+
+	for (int i = 0; i <= (x_l - x_u); ++i) {
+		for(int j = 0 ; j <= (y_l - y_u); ++j) {
 			new_mat[i][j] = old_mat[x_u + i][y_u + j];
 		}
-	}   
+	}
+	
 }	
 		
-tTuple block_cut (long **mat, size_t width, size_t height) {
+tTuple block_cut (long **mat, int width, int height) {
 	int y_l = get_lower_y(mat, width, height);
 	int y_u = get_upper_y(mat, width, height);
 	int x_l = get_lower_x(mat, width, height);
@@ -236,21 +250,142 @@ tTuple block_cut (long **mat, size_t width, size_t height) {
 
 
 
-int line_cut(long **mat, int width, int height);
 
 
-int char_cut(long **mat, int width, int height);
+tuple line_cut(long **mat, int width, int height) {
+	int y_top = 0;
+	int w = 0;
+	int b = 1;
+	int c = 0;
+	int nbLine = 0;
+
+	coord *list = NULL;
+	tuple t;
+
+	for (int y = 0; y < height; ++y) {
+		int x = 0;
+		c = 0;
+		while (x < width && c == 0) {
+			if (mat[x][y] == 1) {
+				c = 1;
+			}
+			++x;
+		}
+		if(c == 1) {
+			if (w == 1) {
+				y_top = y;
+				w = 0;
+			}
+			if (y + 1 == height){
+        			++nbLine;
+
+				list = realloc(list, nbLine * sizeof(coord));
+				list[nbLine - 1].x = y_top;
+				list[nbLine - 1].y = y;
+			}
+			b = 1;
+		}
+		else {
+			if (b == 1) {
+				++nbLine;
+				
+				list = realloc(list, nbLine * sizeof(coord));
+				list[nbLine - 1].x = y_top;
+				list[nbLine - 1].y = y;
+
+				b = 0;
+			}
+			w = 1;
+		}
+	}
+	t.coord = list;
+	t.length = nbLine;
+	return t;
+}
+				
+void stock_lines(long ***lines, long** img, int width, tuple coord) {
+	for (int i = 0; i < coord.length; ++i) {
+		long **m = build_matrix(width, coord.coord[i].y - coord.coord[i].x + 1);
+		copy(img, m, width - 1, 0, coord.coord[i].y, coord.coord[i].x);
+		lines[i] = m;
+	}
+}
 
 
-/*
-int* cut(long **mat, int ligne) {
-	long **new_mat = build_matrix(mat->w, mat->h - ligne);
+tuple char_cut(long **mat, int width, int height)  
+{       
+	int x_top = 0;
+	int w = 0;
     int b = 1;
-    for (int i = 0; i < new_mat->w; ++i) {
-        int j = 0;
-        while (j < mat->w
+    int c = 0;
+    int nbchar = 0;
 
-}*/
+    coord *list = NULL;
+    tuple t;
+
+    for (int x = 0; x < width; ++x) {
+		int y = 0;
+        c = 0;
+        while (y < height && c == 0) {
+			if (mat[x][y] == 1) {
+				c = 1;
+        }
+        ++y;
+    	}
+    	if(c == 1) {
+			if (w == 1) {
+				x_top = x;
+            	w = 0;
+        	}
+			if (x + 1 == width){
+				++nbchar;
+
+            	list = realloc(list, nbchar * sizeof(coord));
+            	list[nbchar - 1].x = x_top;
+            	list[nbchar - 1].y = x;
+        	}
+        	b = 1;
+    	}
+    	else {
+			if (b == 1) {
+				++nbchar;
+
+            	list = realloc(list, nbchar * sizeof(coord));
+            	list[nbchar - 1].x = x_top;
+            	list[nbchar - 1].y = x;
+
+            	b = 0;
+        	}
+        	w = 1;
+    	}
+ 	}
+    t.coord = list;
+    t.length = nbchar;
+    return t;
+}
+
+
+void stock_char(long ****chat, long ***lines, tuple nb_line, int width) {
+	for (int j = 0; j < nb_line.length; ++j) {
+		tuple char_in_line = char_cut(lines[j], width, 
+								nb_line.coord[j].y - nb_line.coord[j].x + 1);
+		long ***line_char = calloc(char_in_line.length, sizeof(long **));
+		for (int i = 0; i < char_in_line.length; ++i) {
+			long **m = build_matrix(char_in_line.coord[i].y - char_in_line.coord[i].x + 2,
+						nb_line.coord[j].y - nb_line.coord[j].x + 2);
+
+			int y_l = nb_line.coord[j].y - nb_line.coord[j].x;
+			copy(lines[j], m, char_in_line.coord[i].y, char_in_line.coord[i].x, y_l, 0);
+			line_char[i] = m;
+			chat[j] = line_char;
+			print_dynmat(m, char_in_line.coord[i].y - char_in_line.coord[i].x,
+			                         nb_line.coord[j].y - nb_line.coord[j].x);
+			printf("\n");
+
+		}
+	}
+}
+
 
 int main() {
 	init_sdl();
@@ -258,19 +393,51 @@ int main() {
     printf("Veuillez entrer le chemin de votre image : ");
     scanf("%256s", path);
 	
+	/*Génération de la matrice*/
 	SDL_Surface *img = load_image(path);
     free(path);
 	display_image(img);
     long **mat_img = build_matrix(img->w, img->h);
     *img = to_black_white(img);
     build_img_matrix(img, mat_img);
+
+	printf("Affichage de la matrice de l'image :\n\n");
     print_dynmat(mat_img, img->w, img->h);
 	
-	tTuple t = block_cut(mat_img, img->w, img->h);
-	printf("x_l = %d; x_u = %d; y_l = %d; y_u = %d;\n", t.x_l, t.x_u, t.y_l, t.y_u);
-	long **block = build_matrix(t.x_l - t.x_u , t.y_l - t.y_u);
+
+	/*Premier découpage*/
+	tTuple t = block_cut(mat_img, (int)img->w, (int)img->h);
+	long **block = build_matrix(t.x_l - t.x_u + 1, t.y_l - t.y_u + 1);
 	copy(mat_img, block, t.x_l, t.x_u, t.y_l, t.y_u);
-	print_dynmat(block, t.x_l - t.x_u , t.y_l - t.y_u);
+
+	printf("Découpage des bords blanc : \n\n");
+	print_dynmat(block, t.x_l - t.x_u + 1, t.y_l - t.y_u + 1);
+
+	free(mat_img);
+
+	/*Découpage en ligne*/
+	int width = t.x_l - t.x_u + 1;
+	int height = t.y_l - t.y_u + 1;
+	tuple nb_lines = line_cut(block, width, height);
+
+	long ***lines = calloc(nb_lines.length, sizeof(long **));
+	stock_lines(lines, block, width, nb_lines);
+	
+	printf("Decoupage en lignes : \n\n");
+	for (int i = 0; i < nb_lines.length; ++i) {
+		print_dynmat(lines[i],width,nb_lines.coord[i].y-nb_lines.coord[i].x);
+		printf("\n");
+	}
+
+	free(block);
+
+	/*Découpage des caratères*/
+	long ****chat = calloc(nb_lines.length, sizeof(long ***));
+	stock_char(chat, lines, nb_lines, width);
+
+	free(lines);
+	free(chat);
+
 	display_image(img);
 	free(img);
 	return 0;
