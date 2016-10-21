@@ -305,7 +305,7 @@ tuple line_cut(long **mat, int width, int height) {
 				
 void stock_lines(long ***lines, long** img, int width, tuple coord) {
 	for (int i = 0; i < coord.length; ++i) {
-long **m = build_matrix(width, coord.coord[i].y - coord.coord[i].x + 1);
+		long **m = build_matrix(width, coord.coord[i].y - coord.coord[i].x + 1);
 		copy(img, m, width - 1, 0, coord.coord[i].y, coord.coord[i].x);
 		lines[i] = m;
 	}
@@ -365,6 +365,28 @@ tuple char_cut(long **mat, int width, int height)
 }
 
 
+void stock_char(long ****chat, long ***lines, tuple nb_line, int width) {
+	for (int j = 0; j < nb_line.length; ++j) {
+		tuple char_in_line = char_cut(lines[j], width, 
+								nb_line.coord[j].y - nb_line.coord[j].x + 1);
+		long ***line_char = calloc(char_in_line.length, sizeof(long **));
+		for (int i = 0; i < char_in_line.length; ++i) {
+			long **m = build_matrix(char_in_line.coord[i].y - char_in_line.coord[i].x + 2,
+						nb_line.coord[j].y - nb_line.coord[j].x + 2);
+
+			int y_l = nb_line.coord[j].y - nb_line.coord[j].x;
+			copy(lines[j], m, char_in_line.coord[i].y, char_in_line.coord[i].x, y_l, 0);
+			line_char[i] = m;
+			chat[j] = line_char;
+			print_dynmat(m, char_in_line.coord[i].y - char_in_line.coord[i].x,
+			                         nb_line.coord[j].y - nb_line.coord[j].x);
+			printf("\n");
+
+		}
+	}
+}
+
+
 int main() {
 	init_sdl();
     char *path = malloc(256);
@@ -411,30 +433,10 @@ int main() {
 
 	/*Découpage des caratères*/
 	long ****chat = calloc(nb_lines.length, sizeof(long ***));
-	for (int j = 0; j< nb_lines.length; ++j) {
-		tuple nb_charinline = char_cut(lines[j],width,nb_lines.coord[j].y-nb_lines.coord[j].x+1);
-		long ***line_char = calloc(nb_charinline.length, sizeof(long **));
-		print_dynmat(lines[j],width,nb_lines.coord[j].y-nb_lines.coord[j].x);
-		printf("\n\n");
-		for (int k = 0; k < nb_charinline.length; ++k) {
-			long **m = build_matrix(nb_charinline.coord[k].y-nb_charinline.coord[k].x + 2,
-					nb_lines.coord[j].y - nb_lines.coord[j].x + 2 );
-			printf("x_gauche = %d; x_droite = %d\n", nb_charinline.coord[k].x,
-													 nb_charinline.coord[k].y);
+	stock_char(chat, lines, nb_lines, width);
 
-			int y_l = nb_lines.coord[j].y - nb_lines.coord[j].x;
-            copy(lines[j], m, nb_charinline.coord[k].y, nb_charinline.coord[k].x,
-						 y_l, 0);
-            line_char[k] = m;
-			print_dynmat(m,nb_charinline.coord[k].y-nb_charinline.coord[k].x,
-						nb_lines.coord[j].y-nb_lines.coord[j].x);
-            printf("\n");
-
-			chat[j]=line_char;
-        }
-
-
-	}
+	free(lines);
+	free(chat);
 
 	display_image(img);
 	free(img);
