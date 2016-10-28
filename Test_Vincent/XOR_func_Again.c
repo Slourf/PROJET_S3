@@ -5,7 +5,7 @@
 # include <stdlib.h>
 
 /* 
-		SOFTMAX FUNCTION : ACTIVATION FUNCTIONS	
+		SIGMOID FUNCTION : ACTIVATION FUNCTIONS	
 */
 double sumExp(float* weightMatrix, int r, int l)
 {
@@ -21,7 +21,7 @@ double sumExp(float* weightMatrix, int r, int l)
 	return res;
 }
 
-float* softmax(float* weightMatrix, int r, int l)
+float* sigmoid(float* weightMatrix, int r, int l)
 {
 	float* res = malloc(r*l* sizeof(float));
 	double sum = sumExp(weightMatrix, r, l);
@@ -30,14 +30,32 @@ float* softmax(float* weightMatrix, int r, int l)
 		int lineoffset = j * r ;
 		for (int i = 0 ; i < r ; ++i)
 		{
-			res[lineoffset+i] = exp(weightMatrix[lineoffset+i]) / sum;
+			res[lineoffset+i] = 1 / (1+exp(-weightMatrix[lineoffset+i]));
+		}
+	}
+
+	return res;
+}
+
+float* derivative_sigmoid(float* weightMatrix, int r, int l)
+{
+	float* res = malloc(r*l* sizeof(float));
+	double sum = sumExp(weightMatrix, r, l);
+	float sigmoid;
+	for (int j = 0 ; j < l ; ++j)
+	{
+		int lineoffset = j * r ;
+		for (int i = 0 ; i < r ; ++i)
+		{
+			sigmoid =  1 / (1-exp(-weightMatrix[lineoffset+i]));
+			res[lineoffset+i] = sigmoid *(1.0-sigmoid);
 		}
 	}
 
 	return res;
 }
 /*
-		END SOFTMAX
+		END SIGMOID
 */
 void printmatrix(float* M, int r, int l)
 {
@@ -55,7 +73,7 @@ void printmatrix(float* M, int r, int l)
 float* matProduct(float* M, int R, int L, float* m, int r, int l)
 {
 	float* res = calloc(L*r ,sizeof(float));
-	printf("Matrix %i x %i\n", r, L);
+//	printf("Matrix %i x %i\n", r, L);
 	for (int j = 0 ; j < L ; ++j)
 	{
 		int lineoffset = j * R;
@@ -66,7 +84,7 @@ float* matProduct(float* M, int R, int L, float* m, int r, int l)
 			{
 				res[nOffset+i] += M[lineoffset+k] * m[k*r+i];
 			}
-				printf("res[%i][%i]=%f\n",nOffset, i, res[nOffset+i]);
+		//		printf("res[%i][%i]=%f\n",nOffset, i, res[nOffset+i]);
 		}
 	}
 	return res;
@@ -99,22 +117,27 @@ int main(int arc, char* argv)
 	float* weight2= malloc(nbHidden * sizeof(float));
 
 	initWeight(weight2, nbHidden, 1);
+	printf("Input matrix:\n");
 	printmatrix(inputs, 2, 4);
-	printf("\n");
+	printf("Coefficients from input to hidden1:\n");
 	printmatrix(weight1, nbHidden, nbInputs);
-	printf("\n");
+	printf("Weights needed from input to hidden1 \n");
 	float* W1 = matProduct(inputs, 2, 4, weight1, 2, 2);
-	printf("\n");
+//	printf("\n");
 	printmatrix(W1, 2, 4);
-	printf("\n");
-	float* r1 = softmax(W1, 2, 4);
+	printf("Activation of weights needed:\n");
+	float* r1 = sigmoid(W1, 2, 4);
 	printmatrix(r1, 2, 4);
-	printf("\n");
+	printf("Weights needed from h1 to output: \n");
 	float* W2 = matProduct(r1, 2, 4, weight2, 1, 2);
 	printmatrix(W2, 1,4);
-	printf("\n");
-	float* r2 = softmax(W2, 1, 4);
+	printf("Activation of output \n");
+	float* r2 = sigmoid(W2, 1, 4);
 	printmatrix(r2, 1, 4);
+
+	float error = 0;
+	for (size_t t = 0 ; t <  
+#FIXME 
 /*	
 	float test1[] = { 2,5,3,6,4,7 };
 	float test2[] = { 2,5, 4,6};

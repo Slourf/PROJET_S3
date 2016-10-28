@@ -38,7 +38,7 @@ void sumWeight (float* zh, float* xi, float* wxh, int x, int y)
 		int lineoffset = i*x; 
 		for (int j = 0; j < y ; ++j)
 		{
-			sum+= xi[j]*wxh[lineoffset+j]; //verifier cette ligne
+			sum+= xi[j] * wxh[j*lineoffset]; //verifier cette ligne
 		}
 		zh[i] = sum;
 		sum = 0;
@@ -190,7 +190,7 @@ int main (int argc,char* argv)
 
 	float loss, sum;
 	
-	for(int t = 0 ; t < 10001 ; ++t)
+	for(int t = 0 ; t < 1007 ; ++t)
 	{
 		x[0] = 1; 
 		x[1] = inputs[2*(t%4)];

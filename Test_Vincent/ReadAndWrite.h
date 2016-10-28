@@ -1,5 +1,5 @@
 # include <assert.h>
-# include <errx.h>
+# include <err.h>
 # include <stdlib.h>
 # include <stdio.h>
 

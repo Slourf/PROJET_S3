@@ -36,7 +36,7 @@ void writeFile(char* path, char* str)
 	{
 		//Write coefficients after tests
 		printf("File opened\n");
-		fputs(str, file);
+		fprintf(file, str);
 		fclose(file); 
 	}
 	else 
@@ -47,10 +47,13 @@ void writeFile(char* path, char* str)
 
 
 
-int main(int argc,char *argv[])
+int main()
 {
-		
-	writeFile("test.txt", argv[1]);
+	char*p;
+	char a = 48;
+	p = &a+1;
+	*p = '\n';
+	writeFile("test.txt", &a );
 	readFile("test.txt");
 	return 0;
 
