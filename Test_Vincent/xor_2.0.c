@@ -162,7 +162,7 @@ int main (int argc,char* argv)
 	int wo = 4; 
 	float outputs[] = { 0, 0, 1, 1 };
 	
-	float learnRate = 0.01;
+	float learnRate = 1;
 	int nbIter = 10000;
 	//input weights
 	int lci = nbInput+1;
