@@ -116,7 +116,7 @@ void initWeight( float* weightMatrix ,int r, int l)
 	
 	for (int j = 0 ; j < l ; ++j)
 		{
-			int lineoffset = (r>1) ? j*l : j ;
+			int lineoffset = j*r ;
 			for (int i = 0 ; i < r ; ++i)
 			{
 				float rnd = ((float)rand()/(double)RAND_MAX);
@@ -131,7 +131,7 @@ float computingError(float* expect, float* actual, int r, int l)
 	float res = 0;
 	for (size_t j = 0 ; j < l ; ++ j)
 		{
-			int lineoffset = (r>1) ? j*l : j;
+			int lineoffset = j*r;
 			for (size_t i = 0 ; i < r ; ++ i)
 			{
 				float tmp = 0.5 * (expect[lineoffset+i] - actual[lineoffset+i])* (expect[lineoffset+i] - actual[lineoffset+i]);
@@ -145,19 +145,19 @@ float computingError(float* expect, float* actual, int r, int l)
 /* DECLARATIONS OF MATRIX HERE: MATRIX; ROWS(Y); LINES(X); */
 int main(int arc, char* argv)
 {
-/*	
+	
 	float inputs[] = {0,0,0,1,1,0,1,1};
 	float outputs[] = { 0 , 1 , 1 , 0};
 	int nbInputs = 2; 
 	int nbOutputs = 1; 
 	int nbHidden = 2;
 	
-	float* weight1= malloc(nbHidden * nbInputs * sizeof(float));
-	initWeight(weight1, nbHidden, nbInputs);
+	float* weight1= malloc(nbHidden * (nbInputs+1) * sizeof(float));
+	initWeight(weight1, nbHidden, nbInputs+1);
 	printf("Weight1: \n");
-	printmatrix(weight1, nbHidden, nbInputs);
+	printmatrix(weight1, nbHidden, nbInputs+1);
 	float* weight2= malloc(nbOutputs * nbHidden * sizeof(float));
-
+/*
 	initWeight(weight2, nbOutputs, nbHidden);
 	printf("weight2 : \n");
 	printmatrix(weight2, nbOutputs, nbHidden);
@@ -166,7 +166,7 @@ int main(int arc, char* argv)
 	printf("Coefficients from input to hidden1:\n");
 	printmatrix(weight1, nbHidden, nbInputs);
 	printf("Current weights from input to hidden1 \n");
-	float* W1 = matProduct(inputs, 2, 4, weight1, 2, 2);
+	float* W1 = matProduct(inputs, 3, 4, weight1, 2, 2);
 //	printf("\n");
 	printmatrix(W1, 2, 4);
 	printf("Activation of weights needed:\n");
@@ -179,13 +179,13 @@ int main(int arc, char* argv)
 	float* r2 = sigmoid(W2, 1, 4);
 	printmatrix(r2, 1, 4);
 	float error = computingError(r2, outputs, 1, 4);
-	printf("Error = %f \n", error);
-*/
+	printf("Error = %f \n", error);*/
+/*
 	float test[] = {1,2,3,4,5,6};
 	printmatrix(test, 3, 2);
 	printf("\n");
 	transposeMatrix( test, 3, 2 );
 	printmatrix(test, 2, 3);
-	
+*/	
 	return 0;
 }

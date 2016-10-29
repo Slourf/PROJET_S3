@@ -8,7 +8,7 @@ void initWeight(float* mat, int x, int y)
 {
 	for (int i = 0; i < x; ++i)
 	{
-		int lineoffset = i*x;
+		int lineoffset = 	(x > 1)? i*y : y;
 		for (int j = 0; j < y; ++j)
 		{
 			mat[lineoffset+j] = ((float)rand()/(double)RAND_MAX)*0.2-0.1;
@@ -21,7 +21,7 @@ void printmatrix(float* mat, int x, int y)
 {
 	for (int i = 0; i < x; ++i)
 	{
-		int lineoffset = i*x;
+		int lineoffset =(x > 1)? i*y : y;
 		for (int j = 0; j < y; ++j)
 		{
 			printf("| %f", mat[lineoffset+j]);
@@ -32,10 +32,10 @@ void printmatrix(float* mat, int x, int y)
 
 void sumWeight (float* zh, float* xi, float* wxh, int x, int y)
 {
-	int sum = 0;
+	float sum = 0;
 	for (int i = 0 ; i < x; ++i)
 	{
-		int lineoffset = i*x; 
+		int lineoffset = (x > 1)? i*y : y;    
 		for (int j = 0; j < y ; ++j)
 		{
 			sum+= xi[j] * wxh[j*lineoffset]; //verifier cette ligne
@@ -61,7 +61,7 @@ void actValue (float* hAct, float* zh, int x)
 
 void probAnswer(float* zy, float* prob, int l)
 {
-	int sum = 0; 
+	float sum = 0; 
 	for (int i = 0 ; i < l ; ++i)
 	{
 	prob[i] = exp(zy[i]);
@@ -85,7 +85,7 @@ void findGradient(float* delta, float* hAct, float* out, int x, int y)
 {
 	for (int i = 0 ; i < x ; ++i)
 	{
-		int lineoffset = i*x;
+		int lineoffset = (x > 1)? i*y : y;
 		for (int j = 0 ; j < y ; ++j) 
 		{
 			delta[lineoffset+j] = hAct[i] * out[j];
@@ -101,7 +101,7 @@ void hActValue(float* hAct, float* why, float* out, int x, int y)
 {
 	for (int i = 1 ; i < x ; ++i)
 	{
-		int lineoffset = i*x;
+		int lineoffset = (x > 1)? i*y : y;
 		for (int j = 0 ; j < y ; ++j)
 		{
 			hAct[i] = why[lineoffset+j] * out[j];
@@ -121,7 +121,7 @@ void changeXH (float* delta, float* xi, float* zh, int x, int y)
 {
 	for (int i = 0 ; i < x ; ++i)
 	{
-		int lineoffset = i*x;
+		int lineoffset = (x > 1)? i*y : y;
 		for (int j = 0 ; j < y ; ++j)
 		{
 			delta[lineoffset+j] = xi[i] * zh[j];
@@ -133,7 +133,7 @@ void changeWeight(float* wh, float* delta, int x, int y, int learningrate)
 {
 	for (int i = 0 ; i < x ; ++i)
 	{
-		int lineoffset = i * x; 
+		int lineoffset = (x > 1)? i*y : y ;
 		for (int j = 0 ; j < y ; ++j)
 		{
 			wh[lineoffset+j] -= learningrate * delta[lineoffset+j]; 
@@ -190,7 +190,7 @@ int main (int argc,char* argv)
 
 	float loss, sum;
 	
-	for(int t = 0 ; t < 1007 ; ++t)
+	for(int t = 0 ; t < 1009 ; ++t)
 	{
 		x[0] = 1; 
 		x[1] = inputs[2*(t%4)];
