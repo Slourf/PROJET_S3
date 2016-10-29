@@ -90,60 +90,102 @@ float* matProduct(float* M, int R, int L, float* m, int r, int l)
 	return res;
 }
 
+void swap (float* a, float* b)
+{
+	int c;
+	c = *a; 
+	*a = *b;
+	*b = c;
+}
+
+void transposeMatrix(float* M, int r, int l)
+{
+	
+	for (int j = 0 ; j < l ; ++j)
+	{
+		for (int i = 0; i < r ; ++i)
+		{
+				printf("swapping %f with %f \n", M[j*l+i] , M[i*r+j]);
+				swap(&M[j*l+i], &M[i*r+j] );
+		}
+	}
+}
+
 void initWeight( float* weightMatrix ,int r, int l)
 {
+	
 	for (int j = 0 ; j < l ; ++j)
 		{
-			int lineoffset = j * l;
+			int lineoffset = (r>1) ? j*l : j ;
 			for (int i = 0 ; i < r ; ++i)
 			{
-				weightMatrix[lineoffset+i] = ((float)rand()/(double)RAND_MAX);
+				float rnd = ((float)rand()/(double)RAND_MAX);
+				weightMatrix[lineoffset+i] = rnd;
+				printf("Rand = %f in %d \n", rnd, lineoffset+i);
 			}
 		}
 }
 
+float computingError(float* expect, float* actual, int r, int l)
+{
+	float res = 0;
+	for (size_t j = 0 ; j < l ; ++ j)
+		{
+			int lineoffset = (r>1) ? j*l : j;
+			for (size_t i = 0 ; i < r ; ++ i)
+			{
+				float tmp = 0.5 * (expect[lineoffset+i] - actual[lineoffset+i])* (expect[lineoffset+i] - actual[lineoffset+i]);
+				res += tmp ;
+				printf("tmp = %f\n", tmp);
+			}
+		}
+	return res;
+}
+
+/* DECLARATIONS OF MATRIX HERE: MATRIX; ROWS(Y); LINES(X); */
 int main(int arc, char* argv)
 {
-	
+/*	
 	float inputs[] = {0,0,0,1,1,0,1,1};
-	float outpus[] = { 0 , 1 , 1 , 0};
+	float outputs[] = { 0 , 1 , 1 , 0};
 	int nbInputs = 2; 
 	int nbOutputs = 1; 
 	int nbHidden = 2;
 	
-	float* weight1= malloc(nbHidden*nbInputs * sizeof(float));
+	float* weight1= malloc(nbHidden * nbInputs * sizeof(float));
 	initWeight(weight1, nbHidden, nbInputs);
+	printf("Weight1: \n");
+	printmatrix(weight1, nbHidden, nbInputs);
+	float* weight2= malloc(nbOutputs * nbHidden * sizeof(float));
 
-	float* weight2= malloc(nbHidden * sizeof(float));
-
-	initWeight(weight2, nbHidden, 1);
+	initWeight(weight2, nbOutputs, nbHidden);
+	printf("weight2 : \n");
+	printmatrix(weight2, nbOutputs, nbHidden);
 	printf("Input matrix:\n");
 	printmatrix(inputs, 2, 4);
 	printf("Coefficients from input to hidden1:\n");
 	printmatrix(weight1, nbHidden, nbInputs);
-	printf("Weights needed from input to hidden1 \n");
+	printf("Current weights from input to hidden1 \n");
 	float* W1 = matProduct(inputs, 2, 4, weight1, 2, 2);
 //	printf("\n");
 	printmatrix(W1, 2, 4);
 	printf("Activation of weights needed:\n");
 	float* r1 = sigmoid(W1, 2, 4);
 	printmatrix(r1, 2, 4);
-	printf("Weights needed from h1 to output: \n");
+	printf("Current weight from h1 to output: \n");
 	float* W2 = matProduct(r1, 2, 4, weight2, 1, 2);
 	printmatrix(W2, 1,4);
 	printf("Activation of output \n");
 	float* r2 = sigmoid(W2, 1, 4);
 	printmatrix(r2, 1, 4);
-
-	float error = 0;
-	for (size_t t = 0 ; t <  
-#FIXME 
-/*	
-	float test1[] = { 2,5,3,6,4,7 };
-	float test2[] = { 2,5, 4,6};
-	float* test = matProduct(test1, 2, 3, test2, 2, 2);
-	printmatrix(test, 2, 3);
+	float error = computingError(r2, outputs, 1, 4);
+	printf("Error = %f \n", error);
 */
-
+	float test[] = {1,2,3,4,5,6};
+	printmatrix(test, 3, 2);
+	printf("\n");
+	transposeMatrix( test, 3, 2 );
+	printmatrix(test, 2, 3);
+	
 	return 0;
 }
