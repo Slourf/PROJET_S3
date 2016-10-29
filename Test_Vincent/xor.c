@@ -2,7 +2,7 @@
 # include <stdlib.h>
 # include <math.h>
 
-/*======Forward propagation========*/
+/*======Forward Propagation========*/
 
 void print(float *M, int r, int l)
  {
@@ -62,6 +62,9 @@ void product(float *in, float *w, float *o, int r, int l)
 		sum = 0.0;
 	}
 }
+
+/*==========End Forward Propagation=========*/
+
 
 int main()
 {
