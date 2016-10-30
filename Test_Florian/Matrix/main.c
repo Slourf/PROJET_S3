@@ -100,7 +100,7 @@ SDL_Surface to_black_white(SDL_Surface *img) {
             g *= 0.59f;
             b *= 0.11f;
             float lumi = r + g + b;
-            if (lumi < 256 / 2)
+            if (lumi < 90)
                 lumi = 0;
             else
                 lumi = 255;
@@ -316,7 +316,7 @@ tuple char_cut(long **mat, int width, int height)
 {       
 	int x_top = 0;
 	int w = 0;
-    int b = 1;
+    int b = 0;
     int c = 0;
     int nbchar = 0;
 
@@ -329,7 +329,7 @@ tuple char_cut(long **mat, int width, int height)
         while (y < height && c == 0) {
 			if (mat[x][y] == 1) {
 				c = 1;
-        }
+        	}
         ++y;
     	}
     	if(c == 1) {
@@ -376,10 +376,16 @@ void stock_char(long ****chat, long ***lines, tuple nb_line, int width) {
 
 			int y_l = nb_line.coord[j].y - nb_line.coord[j].x;
 			copy(lines[j], m, char_in_line.coord[i].y, char_in_line.coord[i].x, y_l, 0);
-			line_char[i] = m;
+		
+			tTuple t = block_cut(m, 
+								char_in_line.coord[i].y - char_in_line.coord[i].x, y_l);
+			long **block = build_matrix(t.x_l - t.x_u + 1, t.y_l - t.y_u + 1);
+			copy(m, block, t.x_l, t.x_u, t.y_l, t.y_u);
+			
+
+			line_char[i] = block;
 			chat[j] = line_char;
-			print_dynmat(m, char_in_line.coord[i].y - char_in_line.coord[i].x,
-			                         nb_line.coord[j].y - nb_line.coord[j].x);
+			print_dynmat(block, t.x_l - t.x_u + 1, t.y_l - t.y_u + 1);
 			printf("\n");
 
 		}
