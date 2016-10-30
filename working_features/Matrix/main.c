@@ -242,7 +242,6 @@ tTuple block_cut (long **mat, int width, int height) {
 	
 	tTuple t;
 	if (y_l <= y_u) {
-		printf("h");
 		t.x_l = width;
 		t.x_u = 0;
 		t.y_l = height;
@@ -343,7 +342,6 @@ tuple char_cut(long **mat, int width, int height)
     	}
     	if(c == 1) {
 	    if (w == 1) {
-		printf("blank = %d; av = %d;\n", blank_count, aver_size_char);
 		if (blank_count > aver_size_char) {
 		   ++nbchar;
 		   list = realloc(list, nbchar * sizeof(coord));
@@ -379,7 +377,6 @@ tuple char_cut(long **mat, int width, int height)
  	}
     t.coord = list;
     t.length = nbchar;
-	printf("length = %d;", t.length);
 //	wait_for_keypressed();
     return t;
 }
@@ -387,17 +384,19 @@ tuple char_cut(long **mat, int width, int height)
 
 void stock_char(long ****chat, long ***lines, tuple nb_line, int width) {
 	for (int j = 0; j < nb_line.length; ++j) {
-		printf("bn");
 		tuple char_in_line = char_cut(lines[j], width, 
 								nb_line.coord[j].y - nb_line.coord[j].x + 1);
-		printf("Hello");
 		long ***line_char = calloc(char_in_line.length, sizeof(long **));
 		for (int i = 0; i < char_in_line.length; ++i) {
-			long **m = build_matrix(char_in_line.coord[i].y - char_in_line.coord[i].x + 2,
-						nb_line.coord[j].y - nb_line.coord[j].x + 2);
+			long **m = 	build_matrix(char_in_line.coord[i].y - 
+									char_in_line.coord[i].x + 2,
+									nb_line.coord[j].y - 
+									nb_line.coord[j].x + 2);
 
 			int y_l = nb_line.coord[j].y - nb_line.coord[j].x;
-			copy(lines[j], m, char_in_line.coord[i].y, char_in_line.coord[i].x, y_l, 0);
+			copy(lines[j], m, char_in_line.coord[i].y, 
+												char_in_line.coord[i].x, 
+												y_l, 0);
 		
 			tTuple t = block_cut(m, 
 								char_in_line.coord[i].y - char_in_line.coord[i].x, y_l);
