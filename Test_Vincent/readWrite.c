@@ -3,16 +3,16 @@
 # include <err.h>
 # include <assert.h>
 
-/*========== Read&Write matrix into file =========*/   
+/*========== Read&Write matrix size_to file =========*/   
 
 void writeFile(char* path, float *a, size_t len)
 {
 	FILE* file = fopen(path, "w");
 	if (file != NULL) 
 	{	
-		for (int i = 0; i < len; i++)
+		for (size_t i = 0; i < len; i++)
 		{
-			fprintf(file, "%.5f\n", *a);
+			fprintf(file, "%f\n", *a);
 			a++;
 		}
 		fclose(file);
@@ -35,7 +35,7 @@ void readFile(char *path, float *b, size_t len)
 	FILE* file = fopen(path, "r");
 	if (file != NULL)
 	{
-		for (int i = 0; i < len; i++)
+		for (size_t i = 0; i < len; i++)
 		{
 			fscanf(file, "%f", (b+i));
 			++b;
@@ -45,7 +45,7 @@ void readFile(char *path, float *b, size_t len)
 	else 
 		errx(1, "Invalid path");
 }
-int main ()
+size_t main ()
 {
 	float weight[] = {1.234567, 2.134567, 3.124567, 4.123567};
 	float *a = weight;
