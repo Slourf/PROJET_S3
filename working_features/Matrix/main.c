@@ -100,7 +100,7 @@ SDL_Surface to_black_white(SDL_Surface *img) {
             g *= 0.59f;
             b *= 0.11f;
             float lumi = r + g + b;
-            if (lumi < 256 / 2)
+            if (lumi < 90)
                 lumi = 0;
             else
                 lumi = 255;
@@ -241,10 +241,19 @@ tTuple block_cut (long **mat, int width, int height) {
 	int x_u = get_upper_x(mat, width, height);
 	
 	tTuple t;
-	t.x_l = x_l;
-	t.x_u = x_u;
-	t.y_l = y_l;
-	t.y_u = y_u;
+	if (y_l <= y_u) {
+		printf("h");
+		t.x_l = width;
+		t.x_u = 0;
+		t.y_l = height;
+		t.y_u = 0;
+	}
+	else {
+		t.x_l = x_l;
+		t.x_u = x_u;
+		t.y_l = y_l;
+		t.y_u = y_u;
+	}
 	return t;
 }
 
@@ -316,10 +325,11 @@ tuple char_cut(long **mat, int width, int height)
 {       
 	int x_top = 0;
 	int w = 0;
-    int b = 1;
+    int b = 0;
     int c = 0;
     int nbchar = 0;
-
+	int blank_count = 0;
+	int aver_size_char = 0;
     coord *list = NULL;
     tuple t;
 
@@ -329,17 +339,25 @@ tuple char_cut(long **mat, int width, int height)
         while (y < height && c == 0) {
 			if (mat[x][y] == 1) {
 				c = 1;
-        }
+        	}
         ++y;
     	}
     	if(c == 1) {
 			if (w == 1) {
+			/*	printf("blank = %d; av = %d;\n", blank_count, aver_size_char);
+				if (blank_count > aver_size_char) {
+					++nbchar;
+					list = realloc(list, nbchar * sizeof(coord));
+					list[nbchar - 1].x = x - 1;
+					list[nbchar - 1].y = x_top + 1;
+					blank_count = 0;
+				}*/
 				x_top = x;
             	w = 0;
         	}
 			if (x + 1 == width){
 				++nbchar;
-
+				aver_size_char = (aver_size_char * (nbchar - 1) + x - x_top) / nbchar;
             	list = realloc(list, nbchar * sizeof(coord));
             	list[nbchar - 1].x = x_top;
             	list[nbchar - 1].y = x;
@@ -347,13 +365,14 @@ tuple char_cut(long **mat, int width, int height)
         	b = 1;
     	}
     	else {
+			++blank_count;
 			if (b == 1) {
 				++nbchar;
-
+				aver_size_char = (aver_size_char * (nbchar - 1) + x - x_top) / nbchar;
             	list = realloc(list, nbchar * sizeof(coord));
             	list[nbchar - 1].x = x_top;
             	list[nbchar - 1].y = x;
-
+				blank_count = 0;
             	b = 0;
         	}
         	w = 1;
@@ -361,14 +380,18 @@ tuple char_cut(long **mat, int width, int height)
  	}
     t.coord = list;
     t.length = nbchar;
+	printf("length = %d;", t.length);
+//	wait_for_keypressed();
     return t;
 }
 
 
 void stock_char(long ****chat, long ***lines, tuple nb_line, int width) {
 	for (int j = 0; j < nb_line.length; ++j) {
+		printf("bn");
 		tuple char_in_line = char_cut(lines[j], width, 
 								nb_line.coord[j].y - nb_line.coord[j].x + 1);
+		printf("Hello");
 		long ***line_char = calloc(char_in_line.length, sizeof(long **));
 		for (int i = 0; i < char_in_line.length; ++i) {
 			long **m = build_matrix(char_in_line.coord[i].y - char_in_line.coord[i].x + 2,
@@ -376,10 +399,16 @@ void stock_char(long ****chat, long ***lines, tuple nb_line, int width) {
 
 			int y_l = nb_line.coord[j].y - nb_line.coord[j].x;
 			copy(lines[j], m, char_in_line.coord[i].y, char_in_line.coord[i].x, y_l, 0);
-			line_char[i] = m;
+		
+			tTuple t = block_cut(m, 
+								char_in_line.coord[i].y - char_in_line.coord[i].x, y_l);
+			long **block = build_matrix(t.x_l - t.x_u + 1, t.y_l - t.y_u + 1);
+			copy(m, block, t.x_l, t.x_u, t.y_l, t.y_u);
+			
+
+			line_char[i] = block;
 			chat[j] = line_char;
-			print_dynmat(m, char_in_line.coord[i].y - char_in_line.coord[i].x,
-			                         nb_line.coord[j].y - nb_line.coord[j].x);
+			print_dynmat(block, t.x_l - t.x_u + 1, t.y_l - t.y_u + 1);
 			printf("\n");
 
 		}
