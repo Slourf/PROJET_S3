@@ -12,7 +12,7 @@ void writeFile(char* path, float *a, size_t len)
 	{	
 		for (int i = 0; i < len; i++)
 		{
-			fprintf(file, "%.5f\n", *a);
+			fprintf(file, "%f\n", *a);
 			a++;
 		}
 		fclose(file);

@@ -1,6 +1,45 @@
 # include <stdio.h>
 # include <stdlib.h>
 # include <math.h>
+# include <assert.h>
+# include <err.h>
+
+/*========== Read&Write matrix into file =========*/
+
+void writeFile(char* path, float *a, size_t len)
+{
+    FILE* file = fopen(path, "w");
+    if (file != NULL)
+    {
+        for (int i = 0; i < len; i++)
+        {
+            fprintf(file, "%f\n", *a);
+            a++;
+        }
+        fclose(file);
+    }
+    else
+        errx(1, "Invalid path");
+}
+
+void readFile(char *path, float *b, size_t len)
+{
+    FILE* file = fopen(path, "r");
+    if (file != NULL)
+    {
+        for (int i = 0; i < len; i++)
+        {
+             fscanf(file, "%f", (b+i));
+             ++b;
+        }
+        fclose(file);
+    }
+    else
+        errx(1, "Invalid path");
+}
+
+
+
 
 /*======Forward Propagation========*/
 
@@ -57,7 +96,7 @@ void product(float *in, float *w, float *o, int r, int l)
 		{	
 			sum += in[i-1] * w[j+i*r];
 		}
-		printf("%f\n", sum);
+//		printf("%f\n", sum);
 		o[j] = sigmoid(sum);
 		sum = 0.0;
 	}
