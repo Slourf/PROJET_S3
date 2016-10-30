@@ -323,56 +323,55 @@ void stock_lines(long ***lines, long** img, int width, tuple coord) {
 
 tuple char_cut(long **mat, int width, int height)  
 {       
-	int x_top = 0;
-	int w = 0;
+    int x_top = 0;
+    int w = 0;
     int b = 0;
     int c = 0;
     int nbchar = 0;
-	int blank_count = 0;
-	int aver_size_char = 0;
+    int blank_count = 0;
+    int aver_size_char = 0;
     coord *list = NULL;
     tuple t;
-
     for (int x = 0; x < width; ++x) {
-		int y = 0;
+	int y = 0;
         c = 0;
         while (y < height && c == 0) {
-			if (mat[x][y] == 1) {
-				c = 1;
-        	}
-        ++y;
+	    if (mat[x][y] == 1) {
+		c = 1;
+            }
+            ++y;
     	}
     	if(c == 1) {
-			if (w == 1) {
-			/*	printf("blank = %d; av = %d;\n", blank_count, aver_size_char);
-				if (blank_count > aver_size_char) {
-					++nbchar;
-					list = realloc(list, nbchar * sizeof(coord));
-					list[nbchar - 1].x = x - 1;
-					list[nbchar - 1].y = x_top + 1;
-					blank_count = 0;
-				}*/
-				x_top = x;
+	    if (w == 1) {
+		printf("blank = %d; av = %d;\n", blank_count, aver_size_char);
+		if (blank_count > aver_size_char) {
+		   ++nbchar;
+		   list = realloc(list, nbchar * sizeof(coord));
+		   list[nbchar - 1].x = x_top+blank_count-1;
+		   list[nbchar - 1].y = x-1;
+		   blank_count = 0;
+		}
+		x_top = x;
             	w = 0;
-        	}
-			if (x + 1 == width){
-				++nbchar;
-				aver_size_char = (aver_size_char * (nbchar - 1) + x - x_top) / nbchar;
-            	list = realloc(list, nbchar * sizeof(coord));
-            	list[nbchar - 1].x = x_top;
-            	list[nbchar - 1].y = x;
-        	}
+            }
+	    if (x + 1 == width){
+	       ++nbchar;
+	       aver_size_char = (aver_size_char * (nbchar - 1) + x - x_top) / nbchar;
+	       list = realloc(list, nbchar * sizeof(coord));
+               list[nbchar - 1].x = x_top;
+               list[nbchar - 1].y = x;
+            }
         	b = 1;
     	}
     	else {
-			++blank_count;
-			if (b == 1) {
-				++nbchar;
-				aver_size_char = (aver_size_char * (nbchar - 1) + x - x_top) / nbchar;
+		++blank_count;
+		if (b == 1) {
+			++nbchar;
+			aver_size_char = (aver_size_char * (nbchar - 1) + x - x_top) / nbchar;
             	list = realloc(list, nbchar * sizeof(coord));
             	list[nbchar - 1].x = x_top;
             	list[nbchar - 1].y = x;
-				blank_count = 0;
+		blank_count = 0;
             	b = 0;
         	}
         	w = 1;
