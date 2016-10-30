@@ -98,18 +98,17 @@ void swap (float* a, float* b)
 	*b = c;
 }
 
-void transposeMatrix(float* M, int r, int l)
+void transposeMatrix (float* M, int c, int l)
 {
-	
-	for (int j = 0 ; j < l ; ++j)
+	for ( int j = 0 ; j <= l/2 ; ++j)
 	{
-		for (int i = 0; i < r ; ++i)
+		for (int i = 0 ; i <= c/2 ; ++i)
 		{
-				printf("swapping %f with %f \n", M[j*l+i] , M[i*r+j]);
-				swap(&M[j*l+i], &M[i*r+j] );
+			swap(M+(j*c+i), M+(i*l+j));
 		}
 	}
 }
+
 
 void initWeight( float* weightMatrix ,int r, int l)
 {
@@ -180,12 +179,12 @@ int main(int arc, char* argv)
 	printmatrix(r2, 1, 4);
 	float error = computingError(r2, outputs, 1, 4);
 	printf("Error = %f \n", error);*/
-/*
+
 	float test[] = {1,2,3,4,5,6};
 	printmatrix(test, 3, 2);
 	printf("\n");
 	transposeMatrix( test, 3, 2 );
 	printmatrix(test, 2, 3);
-*/	
+	
 	return 0;
 }
