@@ -117,7 +117,7 @@ void deltaproduct(float *dst, float *W, float* delta, int c, int l)
 }
 
 
-/*This function compute the delta value for the hudden layer*/
+/*This function compute the delta value for the hidden layer*/
 void DeltaHidden(float *dst, float *delta, float *hidden, int c, int l)
 {
 	float sum = 0;
@@ -197,25 +197,33 @@ int main(int argc, char* argv[])
 		input[1] = 1;
 		product(input, wIH, hidden, 2,3);
 		product(hidden, wHO, output, 1, 3);
-		printf("Got: \n%i XOR %i = %i\n",(int)input[0],(int)input[1],
+		printf("\n%f XOR %f = %f\n",input[0],input[1],
+											 (output[0]));
+		printf("Gives \n%i XOR %i = %i\n",(int)input[0],(int)input[1],
 											 (output[0]>0.5)?1:0);
 		input[0] = 0;
 		input[1] = 0;
 		product(input, wIH, hidden, 2,3);
 		product(hidden, wHO, output, 1, 3);
-		printf("Got: \n%i XOR %i = %i\n",(int)input[0],(int)input[1],
+		printf("\n%f XOR %f = %f\n",input[0],input[1],
+											 (output[0]));
+		printf("Gives \n%i XOR %i = %i\n",(int)input[0],(int)input[1],
 											 (output[0]>0.5)?1:0);
 		input[0] = 0;
 		input[1] = 1;
 		product(input, wIH, hidden, 2,3);
 		product(hidden, wHO, output, 1, 3);
-		printf("Got: \n%i XOR %i = %i\n",(int)input[0],(int)input[1],
+		printf("\n%f XOR %f = %f\n",input[0],input[1],
+											 (output[0]));
+		printf("Gives \n%i XOR %i = %i\n",(int)input[0],(int)input[1],
 											 (output[0]>0.5)?1:0);
 		input[0] = 1;
 		input[1] = 0;
 		product(input, wIH, hidden, 2,3);
 		product(hidden, wHO, output, 1, 3);
-		printf("Got: \n%i XOR %i = %i\n",(int)input[0],(int)input[1],
+		printf("\n%f XOR %f = %f\n",input[0],input[1],
+											 (output[0]));
+		printf("Gives \n%i XOR %i = %i\n",(int)input[0],(int)input[1],
 											 ((output[0]>0.5)?1:0));
 	}
 	else
@@ -228,7 +236,19 @@ int main(int argc, char* argv[])
 		input[1] = x2;
 		product(input, wIH, hidden, 2,3);
 		product(hidden, wHO, output, 1, 3);
-		printf("Got: \n%i XOR %i = %i\n",(int)input[0],(int)input[1],
+		printf(" \n%f XOR %f = %f\n",input[0],input[1],
+											 (output[0]));
+		printf("Gives \n%i XOR %i = %i\n",(int)input[0],(int)input[1],
 											 (output[0]>0.5)?1:0);
 	}
+	free(input);
+	free(outexpected);
+	free(output);
+	free(hidden);
+	free(wIH);
+	free(wHO);
+	free(outputDelta);
+	free(productDelta);
+	free(deltaHidden);
+	return 0;
 }
