@@ -377,7 +377,6 @@ tuple char_cut(long **mat, int width, int height)
  	}
     t.coord = list;
     t.length = nbchar;
-//	wait_for_keypressed();
     return t;
 }
 
@@ -416,33 +415,33 @@ void stock_char(long ****chat, long ***lines, tuple nb_line, int width) {
 
 int main() {
 	init_sdl();
-    char *path = malloc(256);
-    printf("Veuillez entrer le chemin de votre image : ");
-    scanf("%256s", path);
+  char *path = malloc(256);
+  printf("Please enter the path to your image: ");
+  if(scanf("%256s", path) != 1)
+		return -1;
 	
-	/*Génération de la matrice*/
+	/*Generating the matrix*/
 	SDL_Surface *img = load_image(path);
-    free(path);
+  free(path);
 	display_image(img);
-    long **mat_img = build_matrix(img->w, img->h);
-    *img = to_black_white(img);
-    build_img_matrix(img, mat_img);
+  long **mat_img = build_matrix(img->w, img->h);
+  *img = to_black_white(img);
+  build_img_matrix(img, mat_img);
 
-	printf("Affichage de la matrice de l'image :\n\n");
-    print_dynmat(mat_img, img->w, img->h);
-	
+  print_dynmat(mat_img, img->w, img->h);
+	printf("\n");
+	display_image(img);
 
-	/*Premier découpage*/
+	/*First cutting*/
 	tTuple t = block_cut(mat_img, (int)img->w, (int)img->h);
 	long **block = build_matrix(t.x_l - t.x_u + 1, t.y_l - t.y_u + 1);
 	copy(mat_img, block, t.x_l, t.x_u, t.y_l, t.y_u);
 
-	printf("Découpage des bords blanc : \n\n");
 	print_dynmat(block, t.x_l - t.x_u + 1, t.y_l - t.y_u + 1);
-
+	printf("\n");
 	free(mat_img);
 
-	/*Découpage en ligne*/
+	/*Line cutting*/
 	int width = t.x_l - t.x_u + 1;
 	int height = t.y_l - t.y_u + 1;
 	tuple nb_lines = line_cut(block, width, height);
@@ -450,22 +449,19 @@ int main() {
 	long ***lines = calloc(nb_lines.length, sizeof(long **));
 	stock_lines(lines, block, width, nb_lines);
 	
-	printf("Decoupage en lignes : \n\n");
+
 	for (int i = 0; i < nb_lines.length; ++i) {
 		print_dynmat(lines[i],width,nb_lines.coord[i].y-nb_lines.coord[i].x);
 		printf("\n");
 	}
-
 	free(block);
-
-	/*Découpage des caratères*/
+	wait_for_keypressed();	
+	/*Characters cutting*/
 	long ****chat = calloc(nb_lines.length, sizeof(long ***));
 	stock_char(chat, lines, nb_lines, width);
 
 	free(lines);
 	free(chat);
-
-	display_image(img);
 	free(img);
 	return 0;
 }
