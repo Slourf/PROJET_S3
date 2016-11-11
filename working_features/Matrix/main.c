@@ -8,6 +8,7 @@
 # include<SDL/SDL.h>
 # include<SDL/SDL_image.h>
 
+# include "resize.h"
 
 typedef struct {
 	int x_l;
@@ -381,7 +382,7 @@ tuple char_cut(long **mat, int width, int height)
 }
 
 
-void stock_char(long ****chat, long ***lines, tuple nb_line, int width) {
+void stock_char(long ****chat, long ***lines, tuple nb_line, int width, int char_size) {
 	for (int j = 0; j < nb_line.length; ++j) {
 		tuple char_in_line = char_cut(lines[j], width, 
 								nb_line.coord[j].y - nb_line.coord[j].x + 1);
@@ -403,9 +404,9 @@ void stock_char(long ****chat, long ***lines, tuple nb_line, int width) {
 			copy(m, block, t.x_l, t.x_u, t.y_l, t.y_u);
 			
 
-			line_char[i] = block;
+			line_char[i] = resize_char(block, t.x_l - t.x_u + 1, t.y_l - t.y_u + 1, char_size);;
 			chat[j] = line_char;
-			print_dynmat(block, t.x_l - t.x_u + 1, t.y_l - t.y_u + 1);
+			print_dynmat(line_char[i], char_size, char_size);
 			printf("\n");
 
 		}
@@ -458,7 +459,7 @@ int main() {
 	wait_for_keypressed();	
 	/*Characters cutting*/
 	long ****chat = calloc(nb_lines.length, sizeof(long ***));
-	stock_char(chat, lines, nb_lines, width);
+	stock_char(chat, lines, nb_lines, width, 15);
 
 	free(lines);
 	free(chat);
