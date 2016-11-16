@@ -414,22 +414,19 @@ void stock_char(long ****chat, long ***lines, tuple nb_line, int width, int char
 }
 
 
-int main() {
+long**** cut(char *path) {
+
 	init_sdl();
-  char *path = malloc(256);
-  printf("Please enter the path to your image: ");
-  if(scanf("%256s", path) != 1)
-		return -1;
 	
 	/*Generating the matrix*/
 	SDL_Surface *img = load_image(path);
-  free(path);
+  	free(path);
 	display_image(img);
-  long **mat_img = build_matrix(img->w, img->h);
-  *img = to_black_white(img);
-  build_img_matrix(img, mat_img);
+  	long **mat_img = build_matrix(img->w, img->h);
+  	*img = to_black_white(img);
+  	build_img_matrix(img, mat_img);
 
-  print_dynmat(mat_img, img->w, img->h);
+	print_dynmat(mat_img, img->w, img->h);
 	printf("\n");
 	display_image(img);
 
@@ -456,13 +453,24 @@ int main() {
 		printf("\n");
 	}
 	free(block);
-	wait_for_keypressed();	
+	//wait_for_keypressed();	
 	/*Characters cutting*/
 	long ****chat = calloc(nb_lines.length, sizeof(long ***));
 	stock_char(chat, lines, nb_lines, width, 15);
 
 	free(lines);
-	free(chat);
 	free(img);
+	return chat;
+}
+
+
+int main() {
+  	char *path = malloc(256);
+  	printf("Please enter the path to your image: ");
+  	if(scanf("%256s", path) != 1)
+        return -1; 
+	long ****cutted = cut(path);
+	free(cutted);
 	return 0;
+
 }
