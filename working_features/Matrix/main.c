@@ -10,22 +10,22 @@
 
 # include "resize.h"
 
-typedef struct {
+struct tTuple{
 	int x_l;
 	int x_u;
 	int y_l;
 	int y_u;
-} tTuple;
+};
 
-typedef struct {
+struct coord{
 	int x;
 	int y;
-} coord;
+};
 
-typedef struct {
-	coord *coord;
+struct tuple{
+	struct coord *coord;
 	int length;
-} tuple;
+};
 
 void wait_for_keypressed(void) {
   SDL_Event             event;
@@ -235,13 +235,13 @@ void copy(long **old_mat, long **new_mat, int x_l, int x_u, int y_l, int y_u) {
 	
 }	
 		
-tTuple block_cut (long **mat, int width, int height) {
+struct tTuple block_cut (long **mat, int width, int height) {
 	int y_l = get_lower_y(mat, width, height);
 	int y_u = get_upper_y(mat, width, height);
 	int x_l = get_lower_x(mat, width, height);
 	int x_u = get_upper_x(mat, width, height);
 	
-	tTuple t;
+	struct tTuple t;
 	if (y_l <= y_u) {
 		t.x_l = width;
 		t.x_u = 0;
@@ -261,15 +261,15 @@ tTuple block_cut (long **mat, int width, int height) {
 
 
 
-tuple line_cut(long **mat, int width, int height) {
+struct tuple line_cut(long **mat, int width, int height) {
 	int y_top = 0;
 	int w = 0;
 	int b = 1;
 	int c = 0;
 	int nbLine = 0;
 
-	coord *list = NULL;
-	tuple t;
+	struct coord *list = NULL;
+	struct tuple t;
 
 	for (int y = 0; y < height; ++y) {
 		int x = 0;
@@ -288,7 +288,7 @@ tuple line_cut(long **mat, int width, int height) {
 			if (y + 1 == height){
         			++nbLine;
 
-				list = realloc(list, nbLine * sizeof(coord));
+				list = realloc(list, nbLine * sizeof(struct coord));
 				list[nbLine - 1].x = y_top;
 				list[nbLine - 1].y = y;
 			}
@@ -298,7 +298,7 @@ tuple line_cut(long **mat, int width, int height) {
 			if (b == 1) {
 				++nbLine;
 				
-				list = realloc(list, nbLine * sizeof(coord));
+				list = realloc(list, nbLine * sizeof(struct coord));
 				list[nbLine - 1].x = y_top;
 				list[nbLine - 1].y = y;
 
@@ -312,7 +312,7 @@ tuple line_cut(long **mat, int width, int height) {
 	return t;
 }
 				
-void stock_lines(long ***lines, long** img, int width, tuple coord) {
+void stock_lines(long ***lines, long** img, int width, struct tuple coord) {
 	for (int i = 0; i < coord.length; ++i) {
 		long **m = build_matrix(width, coord.coord[i].y - coord.coord[i].x + 1);
 		copy(img, m, width - 1, 0, coord.coord[i].y, coord.coord[i].x);
@@ -321,7 +321,7 @@ void stock_lines(long ***lines, long** img, int width, tuple coord) {
 }
 
 
-tuple char_cut(long **mat, int width, int height)  
+struct tuple char_cut(long **mat, int width, int height)  
 {       
     int x_top = 0;
     int w = 0;
@@ -330,8 +330,8 @@ tuple char_cut(long **mat, int width, int height)
     int nbchar = 0;
     int blank_count = 0;
     int aver_size_char = 0;
-    coord *list = NULL;
-    tuple t;
+    struct coord *list = NULL;
+    struct tuple t;
     for (int x = 0; x < width; ++x) {
 	int y = 0;
         c = 0;
@@ -345,7 +345,7 @@ tuple char_cut(long **mat, int width, int height)
 	    if (w == 1) {
 		if (blank_count > aver_size_char) {
 		   ++nbchar;
-		   list = realloc(list, nbchar * sizeof(coord));
+		   list = realloc(list, nbchar * sizeof(struct coord));
 		   list[nbchar - 1].x = x_top+blank_count-1;
 		   list[nbchar - 1].y = x-1;
 		   blank_count = 0;
@@ -356,7 +356,7 @@ tuple char_cut(long **mat, int width, int height)
 	    if (x + 1 == width){
 	       ++nbchar;
 	       aver_size_char = (aver_size_char * (nbchar - 1) + x - x_top) / nbchar;
-	       list = realloc(list, nbchar * sizeof(coord));
+	       list = realloc(list, nbchar * sizeof(struct coord));
                list[nbchar - 1].x = x_top;
                list[nbchar - 1].y = x;
             }
@@ -367,7 +367,7 @@ tuple char_cut(long **mat, int width, int height)
 		if (b == 1) {
 			++nbchar;
 			aver_size_char = (aver_size_char * (nbchar - 1) + x - x_top) / nbchar;
-            	list = realloc(list, nbchar * sizeof(coord));
+            	list = realloc(list, nbchar * sizeof(struct coord));
             	list[nbchar - 1].x = x_top;
             	list[nbchar - 1].y = x;
 		blank_count = 0;
@@ -382,9 +382,9 @@ tuple char_cut(long **mat, int width, int height)
 }
 
 
-void stock_char(long ****chat, long ***lines, tuple nb_line, int width, int char_size) {
+void stock_char(long ****chat, long ***lines, struct tuple nb_line, int width, int char_size) {
 	for (int j = 0; j < nb_line.length; ++j) {
-		tuple char_in_line = char_cut(lines[j], width, 
+		struct tuple char_in_line = char_cut(lines[j], width, 
 								nb_line.coord[j].y - nb_line.coord[j].x + 1);
 		long ***line_char = calloc(char_in_line.length, sizeof(long **));
 		for (int i = 0; i < char_in_line.length; ++i) {
@@ -398,7 +398,7 @@ void stock_char(long ****chat, long ***lines, tuple nb_line, int width, int char
 												char_in_line.coord[i].x, 
 												y_l, 0);
 		
-			tTuple t = block_cut(m, 
+			struct tTuple t = block_cut(m, 
 								char_in_line.coord[i].y - char_in_line.coord[i].x, y_l);
 			long **block = build_matrix(t.x_l - t.x_u + 1, t.y_l - t.y_u + 1);
 			copy(m, block, t.x_l, t.x_u, t.y_l, t.y_u);
@@ -431,7 +431,7 @@ long**** cut(char *path) {
 	display_image(img);
 
 	/*First cutting*/
-	tTuple t = block_cut(mat_img, (int)img->w, (int)img->h);
+	struct tTuple t = block_cut(mat_img, (int)img->w, (int)img->h);
 	long **block = build_matrix(t.x_l - t.x_u + 1, t.y_l - t.y_u + 1);
 	copy(mat_img, block, t.x_l, t.x_u, t.y_l, t.y_u);
 
@@ -442,7 +442,7 @@ long**** cut(char *path) {
 	/*Line cutting*/
 	int width = t.x_l - t.x_u + 1;
 	int height = t.y_l - t.y_u + 1;
-	tuple nb_lines = line_cut(block, width, height);
+	struct tuple nb_lines = line_cut(block, width, height);
 
 	long ***lines = calloc(nb_lines.length, sizeof(long **));
 	stock_lines(lines, block, width, nb_lines);
@@ -453,11 +453,11 @@ long**** cut(char *path) {
 		printf("\n");
 	}
 	free(block);
-	//wait_for_keypressed();	
+	
 	/*Characters cutting*/
 	long ****chat = calloc(nb_lines.length, sizeof(long ***));
 	stock_char(chat, lines, nb_lines, width, 15);
-
+	
 	free(lines);
 	free(img);
 	return chat;
@@ -470,6 +470,7 @@ int main() {
   	if(scanf("%256s", path) != 1)
         return -1; 
 	long ****cutted = cut(path);
+	free(path);
 	free(cutted);
 	return 0;
 

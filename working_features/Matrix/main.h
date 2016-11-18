@@ -13,22 +13,17 @@
 
 # include "resize.h"
 
-typedef struct {
-	int x_l;
-	int x_u;
-	int y_l;
-	int y_u;
-} tTuple;
+struct tTuple {
+	int x_l, x_u;
+	int y_l, y_u;
+};
 
-typedef struct {
-    int x;
-    int y;
-} coord;
+struct coord { int x, y; };
 
-typedef struct {
+struct tuple {
     coord *coord;
     int length;
-} tuple;
+};
 
 void wait_for_keypressed(void);
 
