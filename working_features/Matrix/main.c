@@ -8,23 +8,24 @@
 # include<SDL/SDL.h>
 # include<SDL/SDL_image.h>
 
+# include "resize.h"
 
-typedef struct {
+struct tTuple{
 	int x_l;
 	int x_u;
 	int y_l;
 	int y_u;
-} tTuple;
+};
 
-typedef struct {
+struct coord{
 	int x;
 	int y;
-} coord;
+};
 
-typedef struct {
-	coord *coord;
+struct tuple{
+	struct coord *coord;
 	int length;
-} tuple;
+};
 
 void wait_for_keypressed(void) {
   SDL_Event             event;
@@ -100,7 +101,7 @@ SDL_Surface to_black_white(SDL_Surface *img) {
             g *= 0.59f;
             b *= 0.11f;
             float lumi = r + g + b;
-            if (lumi < 256 / 2)
+            if (lumi < 90)
                 lumi = 0;
             else
                 lumi = 255;
@@ -234,17 +235,25 @@ void copy(long **old_mat, long **new_mat, int x_l, int x_u, int y_l, int y_u) {
 	
 }	
 		
-tTuple block_cut (long **mat, int width, int height) {
+struct tTuple block_cut (long **mat, int width, int height) {
 	int y_l = get_lower_y(mat, width, height);
 	int y_u = get_upper_y(mat, width, height);
 	int x_l = get_lower_x(mat, width, height);
 	int x_u = get_upper_x(mat, width, height);
 	
-	tTuple t;
-	t.x_l = x_l;
-	t.x_u = x_u;
-	t.y_l = y_l;
-	t.y_u = y_u;
+	struct tTuple t;
+	if (y_l <= y_u) {
+		t.x_l = width;
+		t.x_u = 0;
+		t.y_l = height;
+		t.y_u = 0;
+	}
+	else {
+		t.x_l = x_l;
+		t.x_u = x_u;
+		t.y_l = y_l;
+		t.y_u = y_u;
+	}
 	return t;
 }
 
@@ -252,15 +261,15 @@ tTuple block_cut (long **mat, int width, int height) {
 
 
 
-tuple line_cut(long **mat, int width, int height) {
+struct tuple line_cut(long **mat, int width, int height) {
 	int y_top = 0;
 	int w = 0;
 	int b = 1;
 	int c = 0;
 	int nbLine = 0;
 
-	coord *list = NULL;
-	tuple t;
+	struct coord *list = NULL;
+	struct tuple t;
 
 	for (int y = 0; y < height; ++y) {
 		int x = 0;
@@ -279,7 +288,7 @@ tuple line_cut(long **mat, int width, int height) {
 			if (y + 1 == height){
         			++nbLine;
 
-				list = realloc(list, nbLine * sizeof(coord));
+				list = realloc(list, nbLine * sizeof(struct coord));
 				list[nbLine - 1].x = y_top;
 				list[nbLine - 1].y = y;
 			}
@@ -289,7 +298,7 @@ tuple line_cut(long **mat, int width, int height) {
 			if (b == 1) {
 				++nbLine;
 				
-				list = realloc(list, nbLine * sizeof(coord));
+				list = realloc(list, nbLine * sizeof(struct coord));
 				list[nbLine - 1].x = y_top;
 				list[nbLine - 1].y = y;
 
@@ -303,7 +312,7 @@ tuple line_cut(long **mat, int width, int height) {
 	return t;
 }
 				
-void stock_lines(long ***lines, long** img, int width, tuple coord) {
+void stock_lines(long ***lines, long** img, int width, struct tuple coord) {
 	for (int i = 0; i < coord.length; ++i) {
 		long **m = build_matrix(width, coord.coord[i].y - coord.coord[i].x + 1);
 		copy(img, m, width - 1, 0, coord.coord[i].y, coord.coord[i].x);
@@ -312,48 +321,56 @@ void stock_lines(long ***lines, long** img, int width, tuple coord) {
 }
 
 
-tuple char_cut(long **mat, int width, int height)  
+struct tuple char_cut(long **mat, int width, int height)  
 {       
-	int x_top = 0;
-	int w = 0;
-    int b = 1;
+    int x_top = 0;
+    int w = 0;
+    int b = 0;
     int c = 0;
     int nbchar = 0;
-
-    coord *list = NULL;
-    tuple t;
-
+    int blank_count = 0;
+    int aver_size_char = 0;
+    struct coord *list = NULL;
+    struct tuple t;
     for (int x = 0; x < width; ++x) {
-		int y = 0;
+	int y = 0;
         c = 0;
         while (y < height && c == 0) {
-			if (mat[x][y] == 1) {
-				c = 1;
-        }
-        ++y;
+	    if (mat[x][y] == 1) {
+		c = 1;
+            }
+            ++y;
     	}
     	if(c == 1) {
-			if (w == 1) {
-				x_top = x;
+	    if (w == 1) {
+		if (blank_count > aver_size_char) {
+		   ++nbchar;
+		   list = realloc(list, nbchar * sizeof(struct coord));
+		   list[nbchar - 1].x = x_top+blank_count-1;
+		   list[nbchar - 1].y = x-1;
+		   blank_count = 0;
+		}
+		x_top = x;
             	w = 0;
-        	}
-			if (x + 1 == width){
-				++nbchar;
-
-            	list = realloc(list, nbchar * sizeof(coord));
-            	list[nbchar - 1].x = x_top;
-            	list[nbchar - 1].y = x;
-        	}
+            }
+	    if (x + 1 == width){
+	       ++nbchar;
+	       aver_size_char = (aver_size_char * (nbchar - 1) + x - x_top) / nbchar;
+	       list = realloc(list, nbchar * sizeof(struct coord));
+               list[nbchar - 1].x = x_top;
+               list[nbchar - 1].y = x;
+            }
         	b = 1;
     	}
     	else {
-			if (b == 1) {
-				++nbchar;
-
-            	list = realloc(list, nbchar * sizeof(coord));
+		++blank_count;
+		if (b == 1) {
+			++nbchar;
+			aver_size_char = (aver_size_char * (nbchar - 1) + x - x_top) / nbchar;
+            	list = realloc(list, nbchar * sizeof(struct coord));
             	list[nbchar - 1].x = x_top;
             	list[nbchar - 1].y = x;
-
+		blank_count = 0;
             	b = 0;
         	}
         	w = 1;
@@ -365,21 +382,31 @@ tuple char_cut(long **mat, int width, int height)
 }
 
 
-void stock_char(long ****chat, long ***lines, tuple nb_line, int width) {
+void stock_char(long ****chat, long ***lines, struct tuple nb_line, int width, int char_size) {
 	for (int j = 0; j < nb_line.length; ++j) {
-		tuple char_in_line = char_cut(lines[j], width, 
+		struct tuple char_in_line = char_cut(lines[j], width, 
 								nb_line.coord[j].y - nb_line.coord[j].x + 1);
 		long ***line_char = calloc(char_in_line.length, sizeof(long **));
 		for (int i = 0; i < char_in_line.length; ++i) {
-			long **m = build_matrix(char_in_line.coord[i].y - char_in_line.coord[i].x + 2,
-						nb_line.coord[j].y - nb_line.coord[j].x + 2);
+			long **m = 	build_matrix(char_in_line.coord[i].y - 
+									char_in_line.coord[i].x + 2,
+									nb_line.coord[j].y - 
+									nb_line.coord[j].x + 2);
 
 			int y_l = nb_line.coord[j].y - nb_line.coord[j].x;
-			copy(lines[j], m, char_in_line.coord[i].y, char_in_line.coord[i].x, y_l, 0);
-			line_char[i] = m;
+			copy(lines[j], m, char_in_line.coord[i].y, 
+												char_in_line.coord[i].x, 
+												y_l, 0);
+		
+			struct tTuple t = block_cut(m, 
+								char_in_line.coord[i].y - char_in_line.coord[i].x, y_l);
+			long **block = build_matrix(t.x_l - t.x_u + 1, t.y_l - t.y_u + 1);
+			copy(m, block, t.x_l, t.x_u, t.y_l, t.y_u);
+			
+
+			line_char[i] = resize_char(block, t.x_l - t.x_u + 1, t.y_l - t.y_u + 1, char_size);;
 			chat[j] = line_char;
-			print_dynmat(m, char_in_line.coord[i].y - char_in_line.coord[i].x,
-			                         nb_line.coord[j].y - nb_line.coord[j].x);
+			print_dynmat(line_char[i], char_size, char_size);
 			printf("\n");
 
 		}
@@ -387,58 +414,64 @@ void stock_char(long ****chat, long ***lines, tuple nb_line, int width) {
 }
 
 
-int main() {
+long**** cut(char *path) {
+
 	init_sdl();
-    char *path = malloc(256);
-    printf("Veuillez entrer le chemin de votre image : ");
-    scanf("%256s", path);
 	
-	/*Génération de la matrice*/
+	/*Generating the matrix*/
 	SDL_Surface *img = load_image(path);
-    free(path);
+  	free(path);
 	display_image(img);
-    long **mat_img = build_matrix(img->w, img->h);
-    *img = to_black_white(img);
-    build_img_matrix(img, mat_img);
+  	long **mat_img = build_matrix(img->w, img->h);
+  	*img = to_black_white(img);
+  	build_img_matrix(img, mat_img);
 
-	printf("Affichage de la matrice de l'image :\n\n");
-    print_dynmat(mat_img, img->w, img->h);
-	
+	print_dynmat(mat_img, img->w, img->h);
+	printf("\n");
+	display_image(img);
 
-	/*Premier découpage*/
-	tTuple t = block_cut(mat_img, (int)img->w, (int)img->h);
+	/*First cutting*/
+	struct tTuple t = block_cut(mat_img, (int)img->w, (int)img->h);
 	long **block = build_matrix(t.x_l - t.x_u + 1, t.y_l - t.y_u + 1);
 	copy(mat_img, block, t.x_l, t.x_u, t.y_l, t.y_u);
 
-	printf("Découpage des bords blanc : \n\n");
 	print_dynmat(block, t.x_l - t.x_u + 1, t.y_l - t.y_u + 1);
-
+	printf("\n");
 	free(mat_img);
 
-	/*Découpage en ligne*/
+	/*Line cutting*/
 	int width = t.x_l - t.x_u + 1;
 	int height = t.y_l - t.y_u + 1;
-	tuple nb_lines = line_cut(block, width, height);
+	struct tuple nb_lines = line_cut(block, width, height);
 
 	long ***lines = calloc(nb_lines.length, sizeof(long **));
 	stock_lines(lines, block, width, nb_lines);
 	
-	printf("Decoupage en lignes : \n\n");
+
 	for (int i = 0; i < nb_lines.length; ++i) {
 		print_dynmat(lines[i],width,nb_lines.coord[i].y-nb_lines.coord[i].x);
 		printf("\n");
 	}
-
 	free(block);
-
-	/*Découpage des caratères*/
+	
+	/*Characters cutting*/
 	long ****chat = calloc(nb_lines.length, sizeof(long ***));
-	stock_char(chat, lines, nb_lines, width);
-
+	stock_char(chat, lines, nb_lines, width, 15);
+	
 	free(lines);
-	free(chat);
-
-	display_image(img);
 	free(img);
+	return chat;
+}
+
+
+int main() {
+  	char *path = malloc(256);
+  	printf("Please enter the path to your image: ");
+  	if(scanf("%256s", path) != 1)
+        return -1; 
+	long ****cutted = cut(path);
+	free(path);
+	free(cutted);
 	return 0;
+
 }

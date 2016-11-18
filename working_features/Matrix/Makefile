@@ -1,13 +1,13 @@
 ## Simple SDL mini code
  
-CC=clang
+CC=gcc
  
 CPPFLAGS= `pkg-config --cflags sdl`
 CFLAGS= -Wall -Wextra -Werror -std=c99 -O3
 LDFLAGS=
 LDLIBS= `pkg-config --libs sdl` -lSDL_image
  
-SRC= pixel_operations.c main.c
+SRC= pixel_operations.c resize.c main.c
 OBJ= ${SRC:.c=.o}
  
 all: main

@@ -4,9 +4,11 @@
 # include <stdio.h>
 # include <stdlib.h>
 
-# include"pixel_operations.h"
-# include<SDL/SDL.h>
-# include<SDL/SDL_image.h>
+# include "pixel_operations.h"
+# include <SDL/SDL.h>
+# include <SDL/SDL_image.h>
+
+# include "resize.h"
 
 
 typedef struct {
@@ -100,7 +102,7 @@ SDL_Surface to_black_white(SDL_Surface *img) {
             g *= 0.59f;
             b *= 0.11f;
             float lumi = r + g + b;
-            if (lumi < 256 / 2)
+            if (lumi < 90)
                 lumi = 0;
             else
                 lumi = 255;
@@ -120,7 +122,49 @@ long** build_matrix(size_t x, size_t y) {
     return mat;
 }	
 
+/*
+long** resize_char(long **mat, int width, int height, int size) {
+    double xscale = (size+0.0) / width;
+    double yscale = (size+0.0) / height;
+    double threshold = 0.5 / (xscale * yscale);
+    double yend = 0.0;
+    
+    long** new_mat = build_matrix(size, size);
 
+    for (int f = 0; f < size; ++f) {
+        double ystart = yend;
+        yend = (f + 1) / yscale;
+        if (yend >= height) 
+            yend = height - 0.000001;
+        double xend = 0.0;
+        for (int g = 0; g < size; ++g) {
+            double xstart = xend;
+            xend = (g + 1) / xscale;
+            if (xend >= width)
+                xend = width - 0.000001;
+            double sum = 0.0;
+            for (int y = (int)ystart; y <= (int)yend; ++y) {
+                double yportion = 1.0;
+                if (y == (int)ystart)
+                    yportion -= ystart - y;
+                if (y == (int)yend)
+                    yportion -= y + 1 - yend;
+                for (int x = (int)xstart; x <= (int)xend; ++x) {
+                    double xportion = 1.0;
+                    if (x == (int)xstart)
+                        xportion -= xstart - x;
+                    if (x == (int)xend)
+                        xportion -= x + 1- xend;
+                    sum += mat[x][y] * yportion * xportion;
+                }
+            }
+            new_mat[g][f] = (long)((sum > threshold) ? 1 : 0); 
+        }
+    }   
+    return new_mat;
+}
+
+*/
 void build_img_matrix(SDL_Surface *img, long **mat) {
     for (int x = 0; x < img->w; ++x) {
         for (int y = 0; y < img->h; ++y) {
@@ -241,10 +285,19 @@ tTuple block_cut (long **mat, int width, int height) {
 	int x_u = get_upper_x(mat, width, height);
 	
 	tTuple t;
-	t.x_l = x_l;
-	t.x_u = x_u;
-	t.y_l = y_l;
-	t.y_u = y_u;
+	if (y_l <= y_u) {
+		printf("h");
+		t.x_l = width;
+		t.x_u = 0;
+		t.y_l = height;
+		t.y_u = 0;
+	}
+	else {
+		t.x_l = x_l;
+		t.x_u = x_u;
+		t.y_l = y_l;
+		t.y_u = y_u;
+	}
 	return t;
 }
 
@@ -316,10 +369,11 @@ tuple char_cut(long **mat, int width, int height)
 {       
 	int x_top = 0;
 	int w = 0;
-    int b = 1;
+    int b = 0;
     int c = 0;
     int nbchar = 0;
-
+	int blank_count = 0;
+	int aver_size_char = 0;
     coord *list = NULL;
     tuple t;
 
@@ -329,7 +383,7 @@ tuple char_cut(long **mat, int width, int height)
         while (y < height && c == 0) {
 			if (mat[x][y] == 1) {
 				c = 1;
-        }
+        	}
         ++y;
     	}
     	if(c == 1) {
@@ -339,7 +393,7 @@ tuple char_cut(long **mat, int width, int height)
         	}
 			if (x + 1 == width){
 				++nbchar;
-
+				aver_size_char = (aver_size_char * (nbchar - 1) + x - x_top) / nbchar;
             	list = realloc(list, nbchar * sizeof(coord));
             	list[nbchar - 1].x = x_top;
             	list[nbchar - 1].y = x;
@@ -347,13 +401,14 @@ tuple char_cut(long **mat, int width, int height)
         	b = 1;
     	}
     	else {
+			++blank_count;
 			if (b == 1) {
 				++nbchar;
-
+				aver_size_char = (aver_size_char * (nbchar - 1) + x - x_top) / nbchar;
             	list = realloc(list, nbchar * sizeof(coord));
             	list[nbchar - 1].x = x_top;
             	list[nbchar - 1].y = x;
-
+				blank_count = 0;
             	b = 0;
         	}
         	w = 1;
@@ -361,11 +416,12 @@ tuple char_cut(long **mat, int width, int height)
  	}
     t.coord = list;
     t.length = nbchar;
+//	wait_for_keypressed();
     return t;
 }
 
 
-void stock_char(long ****chat, long ***lines, tuple nb_line, int width) {
+void stock_char(long ****chat, long ***lines, tuple nb_line, int width, int char_size) {
 	for (int j = 0; j < nb_line.length; ++j) {
 		tuple char_in_line = char_cut(lines[j], width, 
 								nb_line.coord[j].y - nb_line.coord[j].x + 1);
@@ -376,15 +432,24 @@ void stock_char(long ****chat, long ***lines, tuple nb_line, int width) {
 
 			int y_l = nb_line.coord[j].y - nb_line.coord[j].x;
 			copy(lines[j], m, char_in_line.coord[i].y, char_in_line.coord[i].x, y_l, 0);
-			line_char[i] = m;
+		
+			tTuple t = block_cut(m, 
+								char_in_line.coord[i].y - char_in_line.coord[i].x, y_l);
+			long **block = build_matrix(t.x_l - t.x_u + 1, t.y_l - t.y_u + 1);
+			copy(m, block, t.x_l, t.x_u, t.y_l, t.y_u);
+			
+
+			line_char[i] = resize_char(block, t.x_l - t.x_u + 1, t.y_l - t.y_u + 1, char_size);
 			chat[j] = line_char;
-			print_dynmat(m, char_in_line.coord[i].y - char_in_line.coord[i].x,
-			                         nb_line.coord[j].y - nb_line.coord[j].x);
+			print_dynmat(line_char[i], char_size, char_size);
 			printf("\n");
 
 		}
 	}
 }
+
+
+
 
 
 int main() {
@@ -433,7 +498,7 @@ int main() {
 
 	/*Découpage des caratères*/
 	long ****chat = calloc(nb_lines.length, sizeof(long ***));
-	stock_char(chat, lines, nb_lines, width);
+	stock_char(chat, lines, nb_lines, width, 15);
 
 	free(lines);
 	free(chat);
