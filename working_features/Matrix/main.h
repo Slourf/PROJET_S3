@@ -10,8 +10,7 @@
 # include "pixel_operations.h"
 # include <SDL/SDL.h>
 # include <SDL/SDL_image.h>
-
-# include "resize.h"
+#include "resize.h"
 
 struct tTuple {
 	int x_l, x_u;
@@ -21,7 +20,7 @@ struct tTuple {
 struct coord { int x, y; };
 
 struct tuple {
-    coord *coord;
+    struct coord *coord;
     int length;
 };
 
