@@ -7,14 +7,12 @@ CFLAGS= -Wall -Wextra -Werror -std=c99 -O3
 LDFLAGS=
 LDLIBS= `pkg-config --libs sdl` -lSDL_image
  
-SRC= cut.c pixel_operations.c resize.c main.c rlsa.c
-
+SRC= pixel_operations.c resize.c main.c rlsa.c
 OBJ= ${SRC:.c=.o}
  
 all: main
  
 main: ${OBJ}
-	${CC} ${OBJ} ${CFLAGS} -o main
  
 clean:
 	rm -f *~ *.o

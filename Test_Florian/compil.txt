@@ -1,5 +1,0 @@
-Pour compiler du code avec #include<gtk/gtk.h> :
-
-gcc $(pkg-config --cflags gtk+-2.0) -c nom_du_fichier.c 
-gcc  nom_du_fichier.o $(pkg-config --libs gtk+-2.0) -o nom_du_fichier
-

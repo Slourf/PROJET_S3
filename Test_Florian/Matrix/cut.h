@@ -1,7 +1,7 @@
-//main.h
+//cut.h
 
-# ifndef MAIN_H_
-# define MAIN_H_
+# ifndef CUT_H_
+# define CUT_H_
 
 # include <err.h>
 # include <stdio.h>
@@ -13,31 +13,30 @@
 
 # include "resize.h"
 
-typedef struct {
-	int x_l;
-	int x_u;
-	int y_l;
-	int y_u;
-} tTuple;
+struct tTuple {
+	int x_l, x_u;
+	int y_l, y_u;
+};
 
-typedef struct {
-    int x;
-    int y;
-} coord;
+struct coord { int x, y; };
 
-typedef struct {
-    coord *coord;
+struct tuple {
+    struct coord *coord;
     int length;
-} tuple;
+};
 
-void wait_for_keypressed(void);
+
+//void wait_for_keypressed(void);
 
 void init_sdl(void);
+
+void img2mat(SDL_Surface *img, long **mat);
+long**** cut(char *path);
 
 SDL_Surface* load_image(char *path);
 SDL_Surface* display_image(SDL_Surface *img);
 SDL_Surface to_black_white(SDL_Surface *img);
 
 long** build_matrix(size_t x, size_t y);
-
+void print_dynmat(long **mat, size_t x, size_t y);
 # endif

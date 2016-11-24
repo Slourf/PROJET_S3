@@ -1,6 +1,6 @@
 # include <stdlib.h>
 # include <stdio.h>
-# include "cut.h"
+# include "main.h"
 
 
 long** resize_char(long **mat, int width, int height, int size) {
