@@ -36,4 +36,5 @@ SDL_Surface to_black_white(SDL_Surface *img);
 
 long** build_matrix(size_t x, size_t y);
 void print_dynmat(long **mat, size_t x, size_t y);
+void free_matrix(long **mat, int w);
 # endif

@@ -125,15 +125,23 @@ long** rlsa(SDL_Surface *img, int c) {
     long **mat_hor = build_matrix(img->w, img->h);
     
 	img2mat(img, mat_img);
-   	
+	
+	/*Horizontal treatment*/
 	rlsa_hor(mat_img, mat_hor, img->h, img->w, img->w / 30);
 	display(mat_hor, img->h, img->w);
-
+	
+	/*Vertical treatment*/
 	rlsa_vec(mat_img, mat_vec, img->h, img->w, img->h / 10);
 	display(mat_vec, img->h, img->w);
 	
-	rlsa_merge(mat_img, mat_vec, mat_hor, img->h, img->w);	
+	/*Merge of the two matrix + Polish with Horizontal treatment*/
+	rlsa_merge(mat_img, mat_vec, mat_hor, img->h, img->w);
+	rlsa_hor(mat_img, mat_img, img->h, img->w, 4);
 	display(mat_img, img->h, img->w);
+	
+
+	free_matrix(mat_vec, img->h);
+	free_matrix(mat_hor, img->h);
 
 	return mat_img;
 }
