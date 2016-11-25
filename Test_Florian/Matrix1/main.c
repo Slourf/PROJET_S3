@@ -113,14 +113,20 @@ SDL_Surface to_black_white(SDL_Surface *img) {
     return *img;
 }
 
-long** build_matrix(size_t x, size_t y) {
+long** build_matrix(size_t w, size_t h) {
     long **mat;
-    mat = malloc(x * sizeof (long *));
-    for (size_t i = 0; i < x; ++i) {
-        mat[i] = malloc(y * sizeof (long));
+    mat = malloc(w * sizeof (long *));
+    for (size_t i = 0; i < w; ++i) {
+        mat[i] = malloc(h * sizeof (long));
     }
     return mat;
 }	
+
+void free_matrix(long **mat, int w) {
+	for (int i = 0; i < w; ++i)
+		free(*(mat + i));
+	free(mat);
+}
 
 
 void img2mat(SDL_Surface *img, long **mat) {
@@ -415,19 +421,14 @@ void stock_char(long ****chat, long ***lines, struct tuple nb_line, int width, i
 }
 
 
-long**** cut(char *path) {
+long**** cut(SDL_Surface *img) {
 
-	init_sdl();
-	
 	/*Generating the matrix*/
-	SDL_Surface *img = load_image(path);
-  	free(path);
 	display_image(img);
   	long **mat_img = build_matrix(img->w, img->h);
   	*img = to_black_white(img);
   	img2mat(img, mat_img);
-
-	print_dynmat(mat_img, img->w, img->h);
+	//print_dynmat(mat_img, img->w, img->h);
 	printf("\n");
 	display_image(img);
 
@@ -436,9 +437,10 @@ long**** cut(char *path) {
 	long **block = build_matrix(t.x_l - t.x_u + 1, t.y_l - t.y_u + 1);
 	copy(mat_img, block, t.x_l, t.x_u, t.y_l, t.y_u);
 
-	print_dynmat(block, t.x_l - t.x_u + 1, t.y_l - t.y_u + 1);
-	printf("\n");
-	free(mat_img);
+//	print_dynmat(block, t.x_l - t.x_u + 1, t.y_l - t.y_u + 1);
+//	printf("\n");
+
+	free_matrix(mat_img, img->w);
 
 	/*Line cutting*/
 	int width = t.x_l - t.x_u + 1;
@@ -448,19 +450,19 @@ long**** cut(char *path) {
 	long ***lines = calloc(nb_lines.length, sizeof(long **));
 	stock_lines(lines, block, width, nb_lines);
 	
-
+/*
 	for (int i = 0; i < nb_lines.length; ++i) {
 		print_dynmat(lines[i],width,nb_lines.coord[i].y-nb_lines.coord[i].x);
 		printf("\n");
 	}
-	free(block);
-	
+	*/
+	free_matrix(block, t.x_l - t.x_u);
 	/*Characters cutting*/
-	long ****chat = calloc(nb_lines.length, sizeof(long ***));
+	long ****chat = calloc(4/*nb_lines.length*/, sizeof(long ***));
 	stock_char(chat, lines, nb_lines, width, 15);
 	
 	free(lines);
-	free(img);
+
 	return chat;
 }
 
@@ -470,9 +472,14 @@ int main() {
   	printf("Please enter the path to your image: ");
   	if(scanf("%256s", path) != 1)
         return -1; 
-	
-	long ****cutted = cut(path);
-	rlsa(path, 4);
+	init_sdl();
+
+	SDL_Surface *img = load_image(path);
+
+	long ****cutted = cut(img);
+	rlsa(img, 22);
+
+	SDL_FreeSurface(img);
 	free(path);
 	free(cutted);
 	return 0;

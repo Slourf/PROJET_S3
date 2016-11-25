@@ -14,6 +14,6 @@
 # include "resize.h"
 
 
-long** rlsa(char *path, int c);
+long** rlsa(SDL_Surface *img, int c);
 
 # endif
