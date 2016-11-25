@@ -5,8 +5,6 @@
 # include <err.h>
 
 /*========== Read&Write matrix into file =========*/
-/*This part is not used yet but it will be used
-later in the projet.*/
 
 /*----------Save a matrix into a file------------*/
 void writeFile(char* path, float *a, size_t len)
@@ -88,8 +86,19 @@ void product(float *in, float *w, float *o, int r, int l)
 
 
 /*=================Backward propagation=================*/
-
+/*dst est vecteur et non matrice 
+  Actual est vecteur et non matrice
+  Output est vecteur et non matrice*/
 /*This function compute the delta value for the output layer*/
+void DeltaOutput(float *dst,float *Actual, float *Expect, int l)
+{
+	for (int j = 0 ; j < l ; ++j)
+	{
+		dst[j] = (Actual[j] - Expect[j])*
+		 Actual[j] * (1 - Actual[j]);
+	}
+}
+/*
 void DeltaOutput(float *dst,float *Actual, float *Expect, int r, int l)
 {
 	for (int j = 0 ; j < l ; ++j)
@@ -102,8 +111,25 @@ void DeltaOutput(float *dst,float *Actual, float *Expect, int r, int l)
 		}
 	}
 }
+*/
+
 /*This fuction compute the product of the delta of output layer and weight
 between hidden layer and output layer*/
+
+void deltaproduct(float *dst, float *W, float* delta, int c, int l)
+{
+	for (int j = 1 ; j < l ; ++j)
+	{
+		int lineoffset = (j)*c;
+		for (int i = 0 ; i < c ; ++i)
+		{
+			dst[j - 1] = W[lineoffset+i+c] * delta[i%l];
+		}
+	}
+}
+
+
+/*
 void deltaproduct(float *dst, float *W, float* delta, int c, int l)
 {
 	for (int j = 0 ; j < l ; ++j)
@@ -115,7 +141,7 @@ void deltaproduct(float *dst, float *W, float* delta, int c, int l)
 		}
 	}
 }
-
+*/
 
 /*This function compute the delta value for the hidden layer*/
 void DeltaHidden(float *dst, float *delta, float *hidden, int c, int l)
