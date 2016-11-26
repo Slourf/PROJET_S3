@@ -8,6 +8,10 @@
 # include "resize.h"
 # include "main.h"
 
+struct block {
+	struct tTuple *tuple;
+	int length;
+}
 
 void rlsa_vec(long **ori, long **mat, int h, int w, int c) {
 	for (int i = 0; i < w; ++i) {
@@ -95,20 +99,21 @@ void rlsa_merge(long **mat_img, long **mat_vec, long **mat_hor, size_t h, size_t
 	}
 }
 
-
+struct block *block_rlsa_cut(long **mat_rlsa, int width, int height){
+	
+}
 
 void display(long **mat, size_t h, size_t w) {
 	
 	SDL_Surface *img = SDL_CreateRGBSurface(0, w, h, 32, 0, 0, 0, 0);	
 	for (size_t y = 0; y < h; ++y) {
         for (size_t x = 0; x < w; ++x) {
-
-			Uint32 pixel = getpixel(img, x, y);
-            if (mat[x][y] == 1)
-            	pixel = SDL_MapRGB(img->format, 0, 0, 0);
-			else
-                pixel = SDL_MapRGB(img->format, 255, 255, 255);
-			putpixel(img, x, y, pixel);
+		Uint32 pixel = getpixel(img, x, y);
+		if (mat[x][y] == 1)
+            		pixel = SDL_MapRGB(img->format, 0, 0, 0);
+		else
+                	pixel = SDL_MapRGB(img->format, 255, 255, 255);
+		putpixel(img, x, y, pixel);
         }
     }   
 	display_image(img);
@@ -118,28 +123,26 @@ void display(long **mat, size_t h, size_t w) {
 long** rlsa(SDL_Surface *img, int c) {
 	if (c)
 		printf("ok\n");
-    /*Generating the matrix*/
+	/*Generating the matrix*/
 	*img = to_black_white(img);
-    long **mat_img = build_matrix(img->w, img->h);
-    long **mat_vec = build_matrix(img->w, img->h);
-    long **mat_hor = build_matrix(img->w, img->h);
-    
+	long **mat_img = build_matrix(img->w, img->h);
+	long **mat_vec = build_matrix(img->w, img->h);
+	long **mat_hor = build_matrix(img->w, img->h);
+
 	img2mat(img, mat_img);
-	
+
 	/*Horizontal treatment*/
-	rlsa_hor(mat_img, mat_hor, img->h, img->w, img->w / 30);
+	rlsa_hor(mat_img, mat_hor, img->h, img->w, img->w / 10);
 	display(mat_hor, img->h, img->w);
-	
+
 	/*Vertical treatment*/
-	rlsa_vec(mat_img, mat_vec, img->h, img->w, img->h / 10);
+	rlsa_vec(mat_img, mat_vec, img->h, img->w, img->h/5 );
 	display(mat_vec, img->h, img->w);
-	
+
 	/*Merge of the two matrix + Polish with Horizontal treatment*/
 	rlsa_merge(mat_img, mat_vec, mat_hor, img->h, img->w);
 	rlsa_hor(mat_img, mat_img, img->h, img->w, 4);
 	display(mat_img, img->h, img->w);
-	
-
 	free_matrix(mat_vec, img->h);
 	free_matrix(mat_hor, img->h);
 
