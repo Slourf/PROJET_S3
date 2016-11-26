@@ -115,9 +115,7 @@ void display(long **mat, size_t h, size_t w) {
 }
 
 
-long** rlsa(SDL_Surface *img, int c) {
-	if (c)
-		printf("ok\n");
+long** rlsa(SDL_Surface *img) {
     /*Generating the matrix*/
 	*img = to_black_white(img);
     long **mat_img = build_matrix(img->w, img->h);
@@ -127,11 +125,11 @@ long** rlsa(SDL_Surface *img, int c) {
 	img2mat(img, mat_img);
 	
 	/*Horizontal treatment*/
-	rlsa_hor(mat_img, mat_hor, img->h, img->w, img->w / 30);
+	rlsa_hor(mat_img, mat_hor, img->h, img->w, img->w / 5);
 	display(mat_hor, img->h, img->w);
 	
 	/*Vertical treatment*/
-	rlsa_vec(mat_img, mat_vec, img->h, img->w, img->h / 10);
+	rlsa_vec(mat_img, mat_vec, img->h, img->w, img->h / 3);
 	display(mat_vec, img->h, img->w);
 	
 	/*Merge of the two matrix + Polish with Horizontal treatment*/
@@ -139,10 +137,9 @@ long** rlsa(SDL_Surface *img, int c) {
 	rlsa_hor(mat_img, mat_img, img->h, img->w, 4);
 	display(mat_img, img->h, img->w);
 	
-
-	free_matrix(mat_vec, img->h);
-	free_matrix(mat_hor, img->h);
-
+	free_matrix(mat_vec, img->w);
+	free_matrix(mat_hor, img->w);
+	
 	return mat_img;
 }
 
