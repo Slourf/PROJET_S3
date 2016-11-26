@@ -479,7 +479,7 @@ int main() {
 	long ****cutted = cut(img);
 	long **mat_rlsa = rlsa(img);
 	
-	long ****rlsa_block = cut(mat_rlsa);
+//	long ****rlsa_block = cut(mat_rlsa);
 
 	free_matrix(mat_rlsa, img->w);
 	SDL_FreeSurface(img);
