@@ -459,10 +459,8 @@ long**** cut(SDL_Surface *img) {
 	free_matrix(block, t.x_l - t.x_u);
 	/*Characters cutting*/
 	long ****chat = calloc(4/*nb_lines.length*/, sizeof(long ***));
-	stock_char(chat, lines, nb_lines, width, 15);
-	
+	stock_char(chat, lines, nb_lines, width, 15);	
 	free(lines);
-
 	return chat;
 }
 
@@ -477,8 +475,7 @@ int main() {
 	SDL_Surface *img = load_image(path);
 
 	long ****cutted = cut(img);
-	long **mat_rlsa = rlsa(img, 42);
-	
+	long **mat_rlsa = rlsa(img, 10);
 	free_matrix(mat_rlsa, img->w);
 	SDL_FreeSurface(img);
 	free(path);

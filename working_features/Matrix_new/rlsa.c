@@ -11,7 +11,7 @@
 struct block {
 	struct tTuple *tuple;
 	int length;
-}
+};
 
 void rlsa_vec(long **ori, long **mat, int h, int w, int c) {
 	for (int i = 0; i < w; ++i) {
@@ -98,10 +98,10 @@ void rlsa_merge(long **mat_img, long **mat_vec, long **mat_hor, size_t h, size_t
 		}
 	}
 }
-
+/*
 struct block *block_rlsa_cut(long **mat_rlsa, int width, int height){
 	
-}
+}*/
 
 void display(long **mat, size_t h, size_t w) {
 	
@@ -145,7 +145,7 @@ long** rlsa(SDL_Surface *img, int c) {
 	display(mat_img, img->h, img->w);
 	free_matrix(mat_vec, img->h);
 	free_matrix(mat_hor, img->h);
-
+	
 	return mat_img;
 }
 
