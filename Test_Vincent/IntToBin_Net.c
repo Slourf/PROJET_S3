@@ -86,9 +86,12 @@ void product(float *in, float *w, float *o, int r, int l)
 
 
 /*=================Backward propagation=================*/
-/*dst est vecteur et non matrice 
-  Actual est vecteur et non matrice
-  Output est vecteur et non matrice*/
+/*
+	*dst est vecteur et non matrice 
+  	*Actual est vecteur et non matrice
+  	*Output est vecteur et non matrice
+	*This function is done 
+ */
 /*This function compute the delta value for the output layer*/
 void DeltaOutput(float *dst,float *Actual, float *Expect, int l)
 {
@@ -118,13 +121,16 @@ between hidden layer and output layer*/
 
 void deltaproduct(float *dst, float *W, float* delta, int c, int l)
 {
+	float sum = 0.0;
 	for (int j = 1 ; j < l ; ++j)
 	{
-		int lineoffset = (j)*c;
+		int lineoffset = j*c;
 		for (int i = 0 ; i < c ; ++i)
 		{
-			dst[j - 1] = W[lineoffset+i+c] * delta[i%l];
+			sum += W[lineoffset+i] * delta[i];
 		}
+		dst[j-1] = sum;
+		sum = 0.0;
 	}
 }
 
@@ -144,6 +150,16 @@ void deltaproduct(float *dst, float *W, float* delta, int c, int l)
 */
 
 /*This function compute the delta value for the hidden layer*/
+void DeltaHidden(float *dst, float *delta, float *hidden, int l)
+{
+	for (int i = 0; i < l; ++i)
+	{
+		dst[i] = hidden[i] * (1 - hidden[i])* delta[i];
+	}
+}
+
+/*
+This function compute the delta value for the hidden layer
 void DeltaHidden(float *dst, float *delta, float *hidden, int c, int l)
 {
 	float sum = 0;
@@ -164,6 +180,7 @@ void DeltaHidden(float *dst, float *delta, float *hidden, int c, int l)
 		}
 	}
 }
+*/
 
 /*This function update the weights after observing the error rate between
 actuel result and expected result*/
