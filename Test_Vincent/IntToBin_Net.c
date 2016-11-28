@@ -199,8 +199,114 @@ void newWeight(float *W, float* M, float* Delta, float lr, int r, int l)
 /*==========End Backward Propagation========*/
 
 
-
 int main(int argc, char* argv[])
+{
+	int nbInput = 2;
+	int nbOutput = 3;
+	int nbHidden = 2;
+	float *input = malloc(nbInput * sizeof(float));
+	float inputs[] = { 0, 0, 0, 1, 1, 0,1,1 };
+//	float outputs[] = { 0, 0, 0, 0, 0, 1, 0, 1, 0};
+	float *outexpected = malloc(nbOutput * sizeof(float));
+	float *output = malloc(nbOutput * sizeof(float));
+	float *hidden = malloc(nbHidden * sizeof(float));
+	float *wIH = malloc(nbHidden * (nbInput+1) * sizeof(float));
+	float *wHO = malloc(nbOutput * (nbHidden+1) * sizeof(float));
+	initWeight(wIH, nbHidden, nbInput+1);
+	initWeight(wHO, nbOutput, nbHidden+1);
+	float *outputDelta = malloc(nbOutput * sizeof(float));
+	float *productDelta = malloc(nbHidden * sizeof(float));
+	float *deltaHidden = malloc(nbOutput* nbHidden* sizeof(float));
+
+	for(int t = 0; t < 10000000; ++t)
+	{
+//		outexpected[0] = outputs[t%4];
+		if ( t % 4 == 0)
+		{
+			outexpected[0] = 0;
+			outexpected[1] = 0;
+			outexpected[2] = 0;
+
+		}
+			if ( t % 4 == 1)
+		{
+			outexpected[0] = 0;
+			outexpected[1] = 0;
+			outexpected[2] = 1;
+
+		}
+			if ( t % 4 == 2)
+		{
+			outexpected[0] = 0;
+			outexpected[1] = 1;
+			outexpected[2] = 0;
+
+		}
+			if ( t % 4 == 3)
+		{
+			outexpected[0] = 0;
+			outexpected[1] = 1;
+			outexpected[2] = 1;
+
+		}
+		input[0] = inputs[2*(t%4)];
+        input[1] = inputs[2*(t%4)+1];
+		product(input, wIH, hidden, 2, 3);
+		product(hidden, wHO, output, 3, 3);
+		DeltaOutput(outputDelta, output, outexpected, 3 );
+		deltaproduct(productDelta, wHO, outputDelta, 3, 2);
+        DeltaHidden(deltaHidden, productDelta, hidden,  2);
+        newWeight(wHO , hidden, outputDelta, 0.3, 3, 2);
+        newWeight(wIH , input, deltaHidden, 0.3, 2, 2);
+	}
+    if (argc == 1)
+     {
+         input[0] = 1;
+         input[1] = 1;
+         product(input, wIH, hidden, 2,2);
+         product(hidden, wHO, output, 3, 2);
+         printf("\n%f %f = %f%f%f\n",input[0],input[1],
+                               output[0],output[1], output[2]);
+   
+         input[0] = 0;
+         input[1] = 0;
+         product(input, wIH, hidden, 2,2);
+         product(hidden, wHO, output, 3, 2);
+                printf("\n%f %f = %f%f%f\n",input[0],input[1],
+                               output[0],output[1], output[2]);
+   
+
+         input[0] = 0;
+         input[1] = 1;
+         product(input, wIH, hidden, 2,2);
+         product(hidden, wHO, output, 3, 2);
+                printf("\n%f %f = %f%f%f\n",input[0],input[1],
+                               output[0],output[1], output[2]);
+	     input[0] = 1;
+         input[1] = 0;
+         product(input, wIH, hidden, 2,2);
+         product(hidden, wHO, output, 3, 2);
+                printf("\n%f %f = %f%f%f\n",input[0],input[1],
+                               output[0],output[1], output[2]);
+
+ }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*int main(int argc, char* argv[])
 {
 	int nbInput = 1;
 	int nbOutput = 4;
@@ -232,10 +338,10 @@ int main(int argc, char* argv[])
 	initWeight(wHO, nbOutput, nbHidden+1);
 	float *outputDelta = malloc(nbOutput * sizeof(float));
 	float *productDelta = malloc(nbHidden * sizeof(float));
-	float *deltaHidden = malloc(nbOutput* nbHidden* sizeof(float));
+	float *deltaHidden = malloc(nbOutput* nbHidden* sizeof(float));*/
 
 /*=======================Training loop======================*/
-	for (int t = 0 ; t < nbTests ; ++t)
+/*	for (int t = 0 ; t < nbTests ; ++t)
 	{
 		input[0] = inputs[(t%8)];
 		outexpected[0] = outputs[(4*t)%32];
@@ -249,7 +355,7 @@ int main(int argc, char* argv[])
 		DeltaHidden(deltaHidden, productDelta, hidden, nbOutput,nbHidden);	//#FIXME (same?)
 		newWeight(wHO , hidden, outputDelta, 0.3, nbOutput, nbHidden+1);
 		newWeight(wIH , input, deltaHidden, 0.3, nbInput, nbHidden+1);
-		/*	printf("%i = ",(int)input[0]);
+*/		/*	printf("%i = ",(int)input[0]);
 			for (int j = 0 ; j < 4; ++j)
 			{
 				printf("%f ", (outexpected[j]));
@@ -260,9 +366,9 @@ int main(int argc, char* argv[])
 	
 
 
-	}
+/*	}*/
 /*===================End of training loop======================*/
-	if (argc == 1)
+/*	if (argc == 1)
 	{
 		for (int i = 0 ; i < 8 ; ++i)
 		{
@@ -277,7 +383,7 @@ int main(int argc, char* argv[])
 			}
 			printf("\n");
 
-		}
+		}*/
 
 	/*	input[0] = 1;
 		input[1] = 1;
@@ -312,7 +418,7 @@ int main(int argc, char* argv[])
 		printf("Gives \n%i XOR %i = %i\n",(int)input[0],(int)input[1],
 											 ((output[0]>0.5)?1:0));
 		*/
-	}
+/*	}
 	else
 	{
 		int x1, x2;
@@ -338,4 +444,4 @@ int main(int argc, char* argv[])
 	free(productDelta);
 	free(deltaHidden);
 	return 0;
-}
+}*/
