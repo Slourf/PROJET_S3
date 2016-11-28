@@ -145,6 +145,17 @@ void rlsa_merge(long **mat_img, long **mat_vec, long **mat_hor, size_t h, size_t
 /*stocking of needed data*/
 /////////////////////////////////////////
 
+
+struct block* append_block(struct block *block, struct block *new) {
+	if (block == NULL)
+		return new;
+	else {
+		new->next = block;
+		return new;
+	}
+}
+
+
 void stock_lines_rlsa(struct lines *lines, struct matrix *img, struct tuple coord) {
     for (int i = 0; i < coord.length; ++i) {
 		struct matrix *m = init_matrix(img->w, coord.coord[i].y - coord.coord[i].x + 1);
@@ -155,10 +166,12 @@ void stock_lines_rlsa(struct lines *lines, struct matrix *img, struct tuple coor
     }
 }
 
-struct block* block_rlsa_cut(struct matrix *matrix) {
+struct block* block_rlsa_cut(struct matrix *matrix, struct block* list) {
 	struct block *block_list = malloc(sizeof (struct block));
-	
-	struct tuple lines = line_cut(matrix->mat, matrix->w, matrix->h);
+	printf("pass4.1\n");
+	printf("w = %zu && h = %zu\n", matrix->w, matrix->h);
+	struct tuple lines = line_cut(matrix->mat, matrix->w, matrix->h); //FIXEME HERE
+	printf("pass4.5\n");
 	struct lines *stored_lines = init_lines(lines.length);
 	stock_lines_rlsa(stored_lines, matrix, lines);
 	for (size_t i = 0; i < stored_lines->size; ++i) {
@@ -175,21 +188,24 @@ struct block* block_rlsa_cut(struct matrix *matrix) {
 		if (lines.length == 1 && columns.length == 1) {
 			//ajouter dans ma block_list
 			//en complétant tout les champs
-			return block_list;
+			list = append_block(list, block_list);
+			return list;
 		}
 		else {
 			for (size_t j = 0; j < stored_columns->size; ++j) {
-				printf("j = %zu\n", j);	
+				printf("j = %zu\n", j);
+				printf("size_colum = %zu && %d\n", stored_columns->size, columns.length);
 				struct coord c_column = *(columns.coord + j);
-
 				(stored_columns + i)->Xori += c_column.x;
 				(stored_columns + i)->Yori += c_column.y;
-				struct matrix *curr = *(stored_lines->mat + j);
-				block_rlsa_cut(curr); 
+				struct matrix *curr = *(stored_columns->mat + j);
+				block_rlsa_cut(curr, list);
 			}
+			return list;
+			printf("pass\n");
 		}
 	}
-	return block_list; 
+	return list; 
 }
 
 
@@ -244,7 +260,7 @@ long** rlsa(SDL_Surface *img, int c) {
 	m->mat = mat_img;
 	printf("passseg\n");
 
-	block_rlsa_cut(m);
+	block_rlsa_cut(m, NULL);
 	printf("passrlsa\n");
 	free_matrix(mat_vec, img->h);
 	free_matrix(mat_hor, img->h);
