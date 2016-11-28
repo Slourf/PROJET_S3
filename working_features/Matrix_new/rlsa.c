@@ -9,8 +9,11 @@
 # include "main.h"
 
 struct block {
-	struct tTuple *tuple;
-	int length;
+	int black_pixel;
+	int ori_black_pixel;
+	size_t Xmin, Ymin, delX, delY;
+	int wb_trans;
+	struct block *next;
 };
 
 void rlsa_vec(long **ori, long **mat, int h, int w, int c) {
