@@ -2,6 +2,7 @@
 #include<gtk/gtk.h>
 #define UTF8(string) g_locale_to_utf8(string, -1, NULL, NULL, NULL)
 
+
 void gtk_window_set_title(GtkWindow *window, const gchar *title);
 void gtk_window_set_default_size(GtkWindow *window, gint width, gint height);
 void gtk_window_set_position(GtkWindow *window, GtkWindowPosition position);
@@ -10,6 +11,13 @@ void gtk_container_add(GtkContainer *container, GtkWidget *widget);
 void gtk_label_set_markup (GtkLabel *label, const gchar *str);
 
 void AddBtn(GtkWidget *window);
+
+struct text {
+	GtkTextBuffer *buffer;
+	GtkTextIter iter;
+	GtkTextMark *mark;
+	GtkWidget *box;
+};
 
 
 /*void browser(GtkWidget *parent_window) {
@@ -38,8 +46,13 @@ void AddBtn(GtkWidget *window);
     gtk_widget_destroy (dialog);
 }*/
 
-void Hello() {
-	printf("Hello World !\n");
+void display_text(GtkButton *button, gpointer data) {
+	if (button) {
+		struct text *d = data;
+		gtk_text_buffer_get_iter_at_mark(d->buffer, &(d->iter), d->mark);
+		gtk_text_view_set_wrap_mode (GTK_TEXT_VIEW (d->box), GTK_WRAP_WORD);
+		gtk_text_buffer_insert(d->buffer, &(d->iter),"Hello World :D !\n", -1);
+	}
 }
 
 
@@ -56,17 +69,16 @@ void AddBtn(GtkWidget *window) {
 	gtk_container_add(GTK_CONTAINER(window), Button);
 }
 
+
 int main(int argc, char **argv)
 {
     GtkWidget *MainWindow = NULL;
     GtkWidget *Label = NULL;
-    GtkWidget *Table;                   //GtkWidget *pVBox;
+    GtkWidget *Table; 
     GtkWidget *Button[4];
 	GtkWidget *entry;
-	GtkWidget *display;
-//	GtkTextBuffer *d_buff;
     gtk_init(&argc, &argv);
-
+	
     /*Création de la fenetre*/
 
     MainWindow = gtk_window_new(GTK_WINDOW_TOPLEVEL);
@@ -77,34 +89,37 @@ int main(int argc, char **argv)
     gtk_window_set_title(GTK_WINDOW(MainWindow), "IRIS by Eye for an eye");
     gtk_window_set_position(GTK_WINDOW(MainWindow), GTK_WIN_POS_CENTER);
     
-
-    
-    /*Création de la box
-
-    pVBox = gtk_vbox_new(TRUE, 0);
-    gtk_container_add(GTK_CONTAINER(MainWindow), pVBox);
-    
-    */
-
     /*Création de la table*/
 
     Table = gtk_table_new(10, 5, TRUE);
     gtk_container_add(GTK_CONTAINER(MainWindow), GTK_WIDGET(Table));
-    /*Création du Bouton*/
+   
+	//creat a second text box
+
+	struct text *data = malloc(sizeof (struct text));
+	
+    data->buffer = gtk_text_buffer_new (NULL);
+    data->box = gtk_text_view_new_with_buffer (data->buffer);
+    data->mark = gtk_text_buffer_get_insert (data->buffer);
+	
+    gtk_text_buffer_get_iter_at_mark (data->buffer, &(data->iter), data->mark);
+    gtk_table_attach_defaults(GTK_TABLE(Table), data->box, 0, 5, 0, 8);
+	
+	/*Création du Bouton*/
     //Bouton 1
 
     Button[0] = gtk_button_new_with_label("Quit");
     g_signal_connect(G_OBJECT(Button[0]), "clicked", G_CALLBACK(gtk_main_quit), NULL);
     
     //Bouton 2
-
+	
     Button[1] = gtk_button_new_with_label("Run");
-    g_signal_connect(G_OBJECT(Button[1]), "clicked", G_CALLBACK(Hello), NULL);
+    g_signal_connect(G_OBJECT(Button[1]), "clicked", G_CALLBACK(display_text), (gpointer)data);
 	
 	//Bouton 3
 
 	Button[2] = gtk_button_new_with_label("Load");
-	g_signal_connect(G_OBJECT(Button[2]), "clicked", G_CALLBACK(Hello), NULL);
+	g_signal_connect(G_OBJECT(Button[2]), "clicked", G_CALLBACK(gtk_main_quit), NULL);
 
     //gtk_box_pack_start(GTK_BOX(pVBox), Button, TRUE, FALSE, 0);
     gtk_table_attach(GTK_TABLE(Table), Button[0], 0, 1, 9, 10, GTK_EXPAND, GTK_EXPAND, 0, 0); 
@@ -119,19 +134,6 @@ int main(int argc, char **argv)
     gtk_entry_set_max_length (GTK_ENTRY (entry),0);
 	gtk_table_attach_defaults(GTK_TABLE(Table), entry, 1, 5, 8, 9);
 	
-	//creat a second text box
-	display = gtk_text_view_new();
-//	d_buff = gtk_text_view_get_buffer (GTK_TEXT_VIEW (buffer));
-
-	gtk_table_attach_defaults(GTK_TABLE(Table), display, 0, 5, 0, 8);
-
-
-    /*AddBtn(MainWindow);
-    
-
-    g_signal_connect(G_OBJECT(MainWindow), "delete-event",
-                    G_CALLBACK(gtk_main_quit), NULL);
-    */
     //Ne rien mettre après ça !
 
     gtk_widget_show_all(MainWindow);
