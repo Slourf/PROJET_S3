@@ -29,6 +29,14 @@ void display_text(GtkButton *button, gpointer data) {
 	}
 }
 
+void load_image(GtkButton *button, gpointer entry) {
+	if (button) {
+	    const char* path = malloc(256);
+	    path = gtk_entry_get_text(GTK_ENTRY(entry));
+		printf("%s\n", path);
+	}
+}
+
 int main(int argc, char **argv)
 {
     GtkWidget *MainWindow = NULL;
@@ -63,6 +71,11 @@ int main(int argc, char **argv)
 	
     gtk_text_buffer_get_iter_at_mark (data->buffer, &(data->iter), data->mark);
     gtk_table_attach_defaults(GTK_TABLE(Table), data->box, 0, 5, 0, 8);
+
+	//create a text box
+    entry = gtk_entry_new (); 
+    gtk_entry_set_max_length (GTK_ENTRY (entry),0);
+    gtk_table_attach_defaults(GTK_TABLE(Table), entry, 1, 5, 8, 9); 
 	
 	/*Création du Bouton*/
     //Bouton 1
@@ -78,7 +91,7 @@ int main(int argc, char **argv)
 	//Bouton 3
 
 	Button[2] = gtk_button_new_with_label("Load");
-	g_signal_connect(G_OBJECT(Button[2]), "clicked", G_CALLBACK(gtk_main_quit), NULL);
+	g_signal_connect(G_OBJECT(Button[2]), "clicked", G_CALLBACK(load_image), (gpointer)entry);
 
     //gtk_box_pack_start(GTK_BOX(pVBox), Button, TRUE, FALSE, 0);
     gtk_table_attach(GTK_TABLE(Table), Button[0], 0, 1, 9, 10, GTK_EXPAND, GTK_EXPAND, 0, 0); 
@@ -97,7 +110,6 @@ int main(int argc, char **argv)
 
     gtk_widget_show_all(MainWindow);
     gtk_main();
-
 
     return EXIT_SUCCESS;
 }
