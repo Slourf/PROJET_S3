@@ -20,32 +20,6 @@ struct text {
 };
 
 
-/*void browser(GtkWidget *parent_window) {
-	GtkWidget *dialog;
-	GtkFileChooserAction action = GTK_FILE_CHOOSER_ACTION_OPEN;
-	gint res;
-	dialog = gtk_file_chooser_dialog_new ("Open File",
-                                          parent_window,
-                                          action,
-                                          "_Cancel",
-                                          GTK_RESPONSE_CANCEL,
-                                          "_Open",
-                                          GTK_RESPONSE_ACCEPT,
-                                          NULL);
-
-    res = gtk_dialog_run (GTK_DIALOG (dialog));
-    if (res == GTK_RESPONSE_ACCEPT)
-    {   
-        char *filename;
-        GtkFileChooser *chooser = GTK_FILE_CHOOSER (dialog);
-        filename = gtk_file_chooser_get_filename (chooser);
-        open_file (filename);
-        g_free (filename);
-    }
-
-    gtk_widget_destroy (dialog);
-}*/
-
 void display_text(GtkButton *button, gpointer data) {
 	if (button) {
 		struct text *d = data;
@@ -54,21 +28,6 @@ void display_text(GtkButton *button, gpointer data) {
 		gtk_text_buffer_insert(d->buffer, &(d->iter),"Hello World :D !\n", -1);
 	}
 }
-
-
-void add_label() {
-	GtkWidget *Label;
-	Label = gtk_label_new(NULL);
-	gtk_label_set_markup(GTK_LABEL(Label), "<b><big> Bonjour ! Comment ca va ?</big></b>");
-}
-
-void AddBtn(GtkWidget *window) {
-	GtkWidget *Button;
-	Button  = gtk_button_new_with_label("Quitter");
-	g_signal_connect(G_OBJECT(Button), "clicked", G_CALLBACK(gtk_main_quit), NULL);
-	gtk_container_add(GTK_CONTAINER(window), Button);
-}
-
 
 int main(int argc, char **argv)
 {
