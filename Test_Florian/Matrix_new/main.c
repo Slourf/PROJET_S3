@@ -10,24 +10,7 @@
 
 # include "resize.h"
 # include "rlsa.h"
-
-
-struct tTuple{
-	int x_l;
-	int x_u;
-	int y_l;
-	int y_u;
-};
-
-struct coord{
-	int x;
-	int y;
-};
-
-struct tuple{
-	struct coord *coord;
-	int length;
-};
+# include "main.h"
 
 
 void wait_for_keypressed(void) {
@@ -474,7 +457,7 @@ int main() {
 	long ****cutted = cut(img);
 	struct matrix *mat_rlsa = rlsa(img, 10);
 	free_matrix(mat_rlsa->mat,img->w);
-	
+	free(mat_rlsa);	
 SDL_FreeSurface(img);
 	free(path);
 	free(cutted);

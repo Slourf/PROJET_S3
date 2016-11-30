@@ -4,38 +4,9 @@
 # include "pixel_operations.h"
 # include <SDL/SDL.h>
 # include <SDL/SDL_image.h>
-
+# include "rlsa.h"
 # include "resize.h"
 # include "main.h"
-
-
-
-/////////////////////////////////////////
-/*Struct declaration*/
-/////////////////////////////////////////
-
-struct block {
-	int black_pixel;
-	int ori_black_pixel;
-	size_t Xmin, Ymin, delX, delY;
-	int wb_trans;
-	struct block *next;
-};
-
-struct matrix {
-	long **mat;
-	size_t h;
-	size_t w;
-};
-
-
-struct lines {
-	struct matrix **mat;
-	int *Xori, *Yori;
-	size_t size;
-};
-
-
 //////////////////////////////////////////
 /*Struct init*/
 //////////////////////////////////////////
