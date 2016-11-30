@@ -14,6 +14,6 @@
 # include "resize.h"
 
 
-long** rlsa(SDL_Surface *img, int c);
+struct matrix* rlsa(SDL_Surface *img, int c);
 
 # endif

@@ -158,10 +158,10 @@ struct block* append_block(struct block *block, struct block *new) {
 
 void stock_lines_rlsa(struct lines *lines, struct matrix *img, struct tuple coord) {
     for (int i = 0; i < coord.length; ++i) {
-		struct matrix *m = init_matrix(img->w, coord.coord[i].y - coord.coord[i].x + 1);
+	struct matrix *m = init_matrix(img->w, coord.coord[i].y - coord.coord[i].x + 1);
         copy(img->mat, m->mat, img->w - 1, 0, coord.coord[i].y, coord.coord[i].x);
-		m->w = img->w - 1;
-		m->h = coord.coord[i].y - coord.coord[i].x;
+	m->w = img->w - 1;
+	m->h = coord.coord[i].y - coord.coord[i].x;
         lines->mat[i] = m;
     }
 }
@@ -227,12 +227,13 @@ void display(long **mat, size_t h, size_t w) {
         }
     }   
 	display_image(img);
+	SDL_FreeSurface(img);
 }
 //////////////////////////////////////////
 /*Final function which will be called*/
 ////////////////////////////////////////
 
-long** rlsa(SDL_Surface *img, int c) {
+struct matrix *rlsa(SDL_Surface *img, int c) {
 	if (c)
 		printf("ok\n");
 	/*Generating the matrix*/
@@ -263,8 +264,7 @@ long** rlsa(SDL_Surface *img, int c) {
 	block_rlsa_cut(m, NULL);
 	printf("passrlsa\n");
 	free_matrix(mat_vec, img->h);
-	free_matrix(mat_hor, img->h);
-	
-	return mat_img;
+	free_matrix(mat_hor, img->h);	
+	return m;
 }
 

@@ -11,6 +11,7 @@
 # include "resize.h"
 # include "rlsa.h"
 
+
 struct tTuple{
 	int x_l;
 	int x_u;
@@ -27,6 +28,7 @@ struct tuple{
 	struct coord *coord;
 	int length;
 };
+
 
 void wait_for_keypressed(void) {
   SDL_Event             event;
@@ -392,30 +394,26 @@ struct tuple char_cut(long **mat, int width, int height)
 void stock_char(long ****chat, long ***lines, struct tuple nb_line, int width, int char_size) {
 	for (int j = 0; j < nb_line.length; ++j) {
 		struct tuple char_in_line = char_cut(lines[j], width, 
-								nb_line.coord[j].y - nb_line.coord[j].x + 1);
+				nb_line.coord[j].y - nb_line.coord[j].x + 1);
 		long ***line_char = calloc(char_in_line.length, sizeof(long **));
 		for (int i = 0; i < char_in_line.length; ++i) {
-			long **m = 	build_matrix(char_in_line.coord[i].y - 
-									char_in_line.coord[i].x + 2,
-									nb_line.coord[j].y - 
-									nb_line.coord[j].x + 2);
+			long **m = 	build_matrix(char_in_line.coord[i].y - 	
+						char_in_line.coord[i].x + 2,
+						nb_line.coord[j].y - 
+						nb_line.coord[j].x + 2);
 
 			int y_l = nb_line.coord[j].y - nb_line.coord[j].x;
-			copy(lines[j], m, char_in_line.coord[i].y, 
-												char_in_line.coord[i].x, 
-												y_l, 0);
-		
+			copy(lines[j], m, char_in_line.coord[i].y,
+					char_in_line.coord[i].x,y_l, 0);
 			struct tTuple t = block_cut(m, 
-								char_in_line.coord[i].y - char_in_line.coord[i].x, y_l);
-			long **block = build_matrix(t.x_l - t.x_u + 1, t.y_l - t.y_u + 1);
+			char_in_line.coord[i].y - char_in_line.coord[i].x, y_l);
+			long **block = build_matrix(t.x_l - t.x_u + 1, 
+							t.y_l - t.y_u + 1);
 			copy(m, block, t.x_l, t.x_u, t.y_l, t.y_u);
-			
-
 			line_char[i] = resize_char(block, t.x_l - t.x_u + 1, t.y_l - t.y_u + 1, char_size);;
 			chat[j] = line_char;
 			print_dynmat(line_char[i], char_size, char_size);
 			printf("\n");
-
 		}
 	}
 }
@@ -458,7 +456,7 @@ long**** cut(SDL_Surface *img) {
 	*/
 	free_matrix(block, t.x_l - t.x_u);
 	/*Characters cutting*/
-	long ****chat = calloc(4/*nb_lines.length*/, sizeof(long ***));
+	long ****chat = calloc(nb_lines.length, sizeof(long ***));
 	stock_char(chat, lines, nb_lines, width, 15);	
 	free(lines);
 	return chat;
@@ -473,11 +471,11 @@ int main() {
 	init_sdl();
 
 	SDL_Surface *img = load_image(path);
-
 	long ****cutted = cut(img);
-	long **mat_rlsa = rlsa(img, 10);
-	free_matrix(mat_rlsa, img->w);
-	SDL_FreeSurface(img);
+	struct matrix *mat_rlsa = rlsa(img, 10);
+	free_matrix(mat_rlsa->mat,img->w);
+	
+SDL_FreeSurface(img);
 	free(path);
 	free(cutted);
 	return 0;
