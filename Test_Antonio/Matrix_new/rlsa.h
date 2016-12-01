@@ -26,7 +26,7 @@ struct block {
 };                                                                              
                                                                                 
 struct matrix {                                                                 
-        long **mat;                                                             
+        long **data;                                                             
         size_t h;                                                               
         size_t w;                                                               
 };                                                                              

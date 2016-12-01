@@ -11,7 +11,6 @@
 # include <SDL/SDL.h>
 # include <SDL/SDL_image.h>
 
-# include "resize.h"
 
 struct tTuple {
 	int x_l, x_u;

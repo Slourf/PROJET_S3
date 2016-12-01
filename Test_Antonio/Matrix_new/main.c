@@ -8,8 +8,6 @@
 # include<SDL/SDL.h>
 # include<SDL/SDL_image.h>
 
-# include "resize.h"
-# include "rlsa.h"
 # include "main.h"
 
 
@@ -98,55 +96,72 @@ SDL_Surface to_black_white(SDL_Surface *img) {
     return *img;
 }
 
-long** build_matrix(size_t w, size_t h) {
-    long **mat;
-    mat = malloc(w * sizeof (long *));
-    for (size_t i = 0; i < w; ++i) {
-        mat[i] = malloc(h * sizeof (long));
-    }
-    return mat;
+struct matrix* build_matrix(size_t w, size_t h) {
+    struct matrix *m = malloc(sizeof (struct matrix));
+	long **mat;
+    mat = calloc(w, sizeof (long *));
+    for (size_t i = 0; i < w; ++i)
+        mat[i] = calloc(h, sizeof (long));
+	m->data = mat;
+	m->h = h;
+	m->w = w;
+    return m;
 }	
 
-void free_matrix(long **mat, int w) {
-	for (int i = 0; i < w; ++i)
-		free(*(mat + i));
+struct line* build_line(size_t length) {
+	struct line *l = calloc(1, sizeof (struct line));
+	l->size = length;
+	l->mat = calloc(length, sizeof (struct matrix*));
+	return l;
+}
+
+struct text* build_text(size_t length) {
+	struct text *txt = calloc(1, sizeof (struct text));
+	txt->size = length;
+	txt->line = calloc(length, sizeof (struct line*));
+	return txt;
+}
+
+void free_matrix(struct matrix *mat) {
+	for (size_t i = 0; i < mat->w; ++i)
+		free(*(mat->data + i));
 	free(mat);
 }
 
 
-void img2mat(SDL_Surface *img, long **mat) {
+void img2mat(SDL_Surface *img, struct matrix *mat) {
     for (int x = 0; x < img->w; ++x) {
         for (int y = 0; y < img->h; ++y) {
             Uint8 r, g, b;
             Uint32 pixel = getpixel(img, x, y);
             SDL_GetRGB(pixel, img->format, &r, &g, &b);
 			if (r < 128)
-				mat[x][y] = 1;
+				mat->data[x][y] = 1;
 			else
-            	mat[x][y] = 0;
+            	mat->data[x][y] = 0;
         }
     }
 }
 
-void print_dynmat(long **mat, size_t x, size_t y) {
-    for (size_t j = 0; j < y; ++j) {
-        for (size_t i = 0; i < x; ++i)
-            printf("%ld", mat[i][j]);
+void print_dynmat(struct matrix *mat) {
+    for (size_t j = 0; j < mat->h; ++j) {
+        for (size_t i = 0; i < mat->w; ++i)
+            printf("%ld", mat->data[i][j]);
         printf("\n");
     }
 }
 
 
-int get_upper_y(long **mat, int width, int height) {
+int get_upper_y(struct matrix *mat) {
 	int b = 1;
-	int y = 0;
+	size_t y = 0;
 	int lineY = 0;
 
-	while (b == 1 && y < height) {
-		int x = 0;
+	while (b == 1 && y < mat->h) {
+		size_t x = 0;
 							     
-		while (b == 1 && x < width) {
-			if(mat[x][y] == 1)
+		while (b == 1 && x < mat->w) {
+			if(mat->data[x][y] == 1)
 				b = 0;
 			++x;
 		}
@@ -157,16 +172,16 @@ int get_upper_y(long **mat, int width, int height) {
 	return lineY;
 }   
 
-int get_lower_y(long **mat, int width, int height) {
+int get_lower_y(struct matrix *mat) {
 	int b = 1;
-	int y = height - 1;
-	int lineY = height - 1;
+	int y = mat->h - 1;
+	int lineY = mat->h - 1;
 
 	while (b == 1 && y >= 0) {
-		int x = 0;
+		size_t x = 0;
 		
-		while (b == 1 && x < width) {
-			if (mat[x][y] == 1)
+		while (b == 1 && x < mat->w) {
+			if (mat->data[x][y] == 1)
 				b = 0;
 			++x;
 		}
@@ -177,16 +192,16 @@ int get_lower_y(long **mat, int width, int height) {
 	return lineY;
 }
 
-int get_upper_x(long **mat, int width, int height) {
+int get_upper_x(struct matrix *mat) {
     int b = 1;
-    int x = 0;
+    size_t x = 0;
     int columnX = 0;
 
-    while (b == 1 && x < width) {
-        int y = 0;
+    while (b == 1 && x < mat->w) {
+        size_t y = 0;
     
-        while (b == 1 && y < height) {
-            if(mat[x][y] == 1)
+        while (b == 1 && y < mat->h) {
+            if(mat->data[x][y] == 1)
                 b = 0;
             ++y;
         }
@@ -197,16 +212,16 @@ int get_upper_x(long **mat, int width, int height) {
     return columnX;
 }   
 
-int get_lower_x(long **mat, int width, int height) {
+int get_lower_x(struct matrix *mat) {
     int b = 1;
-    int x = width - 1;
-    int columnX = width - 1;
+    int x = mat->w - 1;
+    int columnX = mat->w - 1;
 
     while (b == 1 && x >= 0) {
-        int y = 0;
+        size_t y = 0;
     
-        while (b == 1 && y < height) {
-            if (mat[x][y] == 1)
+        while (b == 1 && y < mat->h) {
+            if (mat->data[x][y] == 1)
                 b = 0;
             ++y;
         }
@@ -217,27 +232,26 @@ int get_lower_x(long **mat, int width, int height) {
     return columnX;
 }
 
-void copy(long **old_mat, long **new_mat, int x_l, int x_u, int y_l, int y_u) {
+void copy(struct matrix *old_mat, struct matrix *new_mat, int x_u, int y_u) {
 
-	for (int i = 0; i <= (x_l - x_u); ++i) {
-		for(int j = 0 ; j <= (y_l - y_u); ++j) {
-			new_mat[i][j] = old_mat[x_u + i][y_u + j];
+	for (size_t i = 0; i < new_mat->w; ++i) {
+		for(size_t j = 0 ; j < new_mat->h; ++j) {
+			new_mat->data[i][j] = old_mat->data[x_u + i][y_u + j];
 		}
 	}
-	
 }	
 		
-struct tTuple block_cut (long **mat, int width, int height) {
-	int y_l = get_lower_y(mat, width, height);
-	int y_u = get_upper_y(mat, width, height);
-	int x_l = get_lower_x(mat, width, height);
-	int x_u = get_upper_x(mat, width, height);
+struct tTuple block_cut (struct matrix *mat) {
+	int y_l = get_lower_y(mat);
+	int y_u = get_upper_y(mat);
+	int x_l = get_lower_x(mat);
+	int x_u = get_upper_x(mat);
 	
 	struct tTuple t;
 	if (y_l <= y_u) {
-		t.x_l = width;
+		t.x_l = mat->w;
 		t.x_u = 0;
-		t.y_l = height;
+		t.y_l = mat->h;
 		t.y_u = 0;
 	}
 	else {
@@ -249,11 +263,7 @@ struct tTuple block_cut (long **mat, int width, int height) {
 	return t;
 }
 
-
-
-
-
-struct tuple line_cut(long **mat, int width, int height) {
+struct tuple line_cut(struct matrix *mat) {
 	int y_top = 0;
 	int w = 0;
 	int b = 1;
@@ -263,11 +273,11 @@ struct tuple line_cut(long **mat, int width, int height) {
 	struct coord *list = NULL;
 	struct tuple t;
 
-	for (int y = 0; y < height; ++y) {
-		int x = 0;
+	for (size_t y = 0; y < mat->h; ++y) {
+		size_t x = 0;
 		c = 0;
-		while (x < width && c == 0) {
-			if (mat[x][y] == 1) {
+		while (x < mat->w && c == 0) {
+			if (mat->data[x][y] == 1) {
 				c = 1;
 			}
 			++x;
@@ -277,7 +287,7 @@ struct tuple line_cut(long **mat, int width, int height) {
 				y_top = y;
 				w = 0;
 			}
-			if (y + 1 == height){
+			if (y + 1 == mat->h){
         			++nbLine;
 
 				list = realloc(list, nbLine * sizeof(struct coord));
@@ -304,16 +314,16 @@ struct tuple line_cut(long **mat, int width, int height) {
 	return t;
 }
 				
-void stock_lines(long ***lines, long** img, int width, struct tuple coord) {
+void stock_lines(struct line *line, struct matrix *img, struct tuple coord) {
 	for (int i = 0; i < coord.length; ++i) {
-		long **m = build_matrix(width, coord.coord[i].y - coord.coord[i].x + 1);
-		copy(img, m, width - 1, 0, coord.coord[i].y, coord.coord[i].x);
-		lines[i] = m;
+		struct matrix *m = build_matrix(img->w, coord.coord[i].y - coord.coord[i].x + 1);
+		copy(img, m, 0, coord.coord[i].x);
+		line->mat[i] = m;
 	}
 }
 
 
-struct tuple char_cut(long **mat, int width, int height)  
+struct tuple char_cut(struct matrix *mat)  
 {       
     int x_top = 0;
     int w = 0;
@@ -324,45 +334,46 @@ struct tuple char_cut(long **mat, int width, int height)
     int aver_size_char = 0;
     struct coord *list = NULL;
     struct tuple t;
-    for (int x = 0; x < width; ++x) {
-	int y = 0;
+    for (size_t x = 0; x < mat->w; ++x) {
+
+		size_t y = 0;
         c = 0;
-        while (y < height && c == 0) {
-	    if (mat[x][y] == 1) {
+        while (y < mat->h && c == 0) {
+	    if (mat->data[x][y] == 1) {
 		c = 1;
             }
             ++y;
     	}
     	if(c == 1) {
-	    if (w == 1) {
-		if (blank_count > aver_size_char+1) {
-		   ++nbchar;
-		   list = realloc(list, nbchar * sizeof(struct coord));
-		   list[nbchar - 1].x = x_top+blank_count-1;
-		   list[nbchar - 1].y = x-1;
-		   blank_count = 0;
-		}
-		x_top = x;
+	    	if (w == 1) {
+				if (blank_count > aver_size_char+1) {
+		   			++nbchar;
+		   			list = realloc(list, nbchar * sizeof(struct coord));
+		   			list[nbchar - 1].x = x_top+blank_count-1;
+		   			list[nbchar - 1].y = x-1;
+		   			blank_count = 0;
+				}
+				x_top = x;
             	w = 0;
             }
-	    if (x + 1 == width){
-	       ++nbchar;
-	       aver_size_char = (aver_size_char * (nbchar - 1) + x - x_top) / nbchar;
-	       list = realloc(list, nbchar * sizeof(struct coord));
-               list[nbchar - 1].x = x_top;
-               list[nbchar - 1].y = x;
+	    	if (x + 1 == mat->w){
+	       		++nbchar;
+	       		aver_size_char = (aver_size_char * (nbchar - 1) + x - x_top) / nbchar;
+	       		list = realloc(list, nbchar * sizeof(struct coord));
+               	list[nbchar - 1].x = x_top;
+               	list[nbchar - 1].y = x;
             }
         	b = 1;
     	}
     	else {
-		++blank_count;
-		if (b == 1) {
-			++nbchar;
-			aver_size_char = (aver_size_char * (nbchar - 1) + x - x_top) / nbchar;
+			++blank_count;
+			if (b == 1) {
+				++nbchar;
+				aver_size_char = (aver_size_char * (nbchar - 1) + x - x_top) / nbchar;
             	list = realloc(list, nbchar * sizeof(struct coord));
             	list[nbchar - 1].x = x_top;
             	list[nbchar - 1].y = x;
-		blank_count = 0;
+				blank_count = 0;
             	b = 0;
         	}
         	w = 1;
@@ -374,91 +385,89 @@ struct tuple char_cut(long **mat, int width, int height)
 }
 
 
-void stock_char(struct chat *chat, long ***lines, struct tuple nb_line, int width, int char_size) {
+void stock_char(struct text *text, struct line *line, struct tuple nb_line, int char_size) {
 	for (int j = 0; j < nb_line.length; ++j) {
-		struct tuple char_in_line = char_cut(lines[j], width, 
-				nb_line.coord[j].y - nb_line.coord[j].x + 1);
-		long ***line_char = calloc(char_in_line.length, sizeof(long **));
-		for (int i = 0; i < char_in_line.length; ++i) {
-			long **m = 	build_matrix(char_in_line.coord[i].y - 	
+		struct tuple char_in_line = char_cut(line->mat[j]); 
+		struct line *l = build_line(char_in_line.length);
+		for (int i = 0; i < (int)line->size; ++i) {
+			struct matrix *m = 	build_matrix(char_in_line.coord[i].y - 	
 						char_in_line.coord[i].x + 2,
 						nb_line.coord[j].y - 
 						nb_line.coord[j].x + 2);
-
-			int y_l = nb_line.coord[j].y - nb_line.coord[j].x;
-			copy(lines[j], m, char_in_line.coord[i].y,
-					char_in_line.coord[i].x,y_l, 0);
-			struct tTuple t = block_cut(m, 
-			char_in_line.coord[i].y - char_in_line.coord[i].x, y_l);
-			long **block = build_matrix(t.x_l - t.x_u + 1, 
+			copy(line->mat[j], m, char_in_line.coord[i].x, 0);
+			struct tTuple t = block_cut(m);
+			struct matrix *block = build_matrix(t.x_l - t.x_u + 1, 
 							t.y_l - t.y_u + 1);
-			copy(m, block, t.x_l, t.x_u, t.y_l, t.y_u);
-			line_char[i] = resize_char(block, t.x_l - t.x_u + 1, t.y_l - t.y_u + 1, char_size);;
-			print_dynmat(line_char[i], char_size, char_size);
+			printf("copy\n");
+			printf("m_w %zu m_h = %zu && x = %d y = %d\n", 
+					block->h, block->w, t.x_l - t.x_u, t.y_l - t.y_u);
+			copy(m, block, t.x_u, t.y_u);
+			printf("ward\n");
+			l->mat[i] = resize_char(block, char_size);
+			print_dynmat(l->mat[i]);
 			printf("\n");
 		}
-		chat[j].length=char_in_line.length;
-		chat[j].line = line_char;
+		++text->size;
+		text->line[j] = l;
 	}
+	printf("DONE\n");
 }
 
-void free_lines(int i,struct tuple nb_lines,long ***lines){
-	if(i<nb_lines.length)
-		free_lines(i+1,nb_lines,lines);
-	free_matrix(lines[i],nb_lines.coord[i].y-nb_lines.coord[i].x);
+void free_lines(struct line *l){
+	for (size_t i = 0; i < l->size; ++i)
+		free_matrix(l->mat[i]);
+	free(l);	
 }
 
-void free_char(int i, int nblines, struct chat *chat){
-	if(i<nblines)
-		free_char(i+1,nblines,chat);
-	for(int z = chat[i].length-1;z>=0;z--){
-		free_matrix(chat[i].line[z],15);
-	}
+void free_text(struct text *text){
+	for (size_t i = 0; i < text->size; ++i)
+		free_lines(text->line[i]);
+	free(text);
 }
 
-struct chat *cut(SDL_Surface *img) {
+struct text *cut(SDL_Surface *img) {
 
 	/*Generating the matrix*/
 	display_image(img);
-  	long **mat_img = build_matrix(img->w, img->h);
+  	struct matrix *mat_img = build_matrix(img->w, img->h);
   	*img = to_black_white(img);
   	img2mat(img, mat_img);
 	//print_dynmat(mat_img, img->w, img->h);
 	printf("\n");
 	display_image(img);
-
+	printf("pass\n");
 	/*First cutting*/
-	struct tTuple t = block_cut(mat_img, (int)img->w, (int)img->h);
-	long **block = build_matrix(t.x_l - t.x_u + 1, t.y_l - t.y_u + 1);
-	copy(mat_img, block, t.x_l, t.x_u, t.y_l, t.y_u);
-
+	struct tTuple t = block_cut(mat_img);
+	struct matrix *block = build_matrix(t.x_l - t.x_u + 1, t.y_l - t.y_u + 1);
+	copy(mat_img, block, t.x_u, t.y_u);
+	printf("pass1\n");
 //	print_dynmat(block, t.x_l - t.x_u + 1, t.y_l - t.y_u + 1);
 //	printf("\n");
 
-	free_matrix(mat_img, img->w);
-
+	free_matrix(mat_img);
+	printf("free1\n");
 	/*Line cutting*/
-	int width = t.x_l - t.x_u + 1;
-	int height = t.y_l - t.y_u + 1;
-	struct tuple nb_lines = line_cut(block, width, height);
+	struct tuple nb_lines = line_cut(block);
 
-	long ***lines = calloc(nb_lines.length, sizeof(long **));
-	stock_lines(lines, block, width, nb_lines);
-	
+	struct line *lines = build_line(nb_lines.length);
+	stock_lines(lines, block, nb_lines);
+	printf("pass2\n");	
 /*
 	for (int i = 0; i < nb_lines.length; ++i) {
 		print_dynmat(lines[i],width,nb_lines.coord[i].y-nb_lines.coord[i].x);
 		printf("\n");
 	}
-	*/
-	free_matrix(block, t.x_l - t.x_u);
+ */
+	free_matrix(block);
+	printf("free2\n");
 	/*Characters cutting*/
-	struct chat *chat = calloc(nb_lines.length, sizeof(struct chat));
-	stock_char(chat, lines, nb_lines, width, 15);
-	chat->nbline = nb_lines.length;
-	free_lines(0,nb_lines,lines);
-	free(lines);
-	return chat;
+	struct text *text = build_text(nb_lines.length);
+	stock_char(text, lines, nb_lines, 15);
+	printf("pass3\n");
+	free_lines(lines);
+	free(nb_lines.coord);
+	printf("pass4\n");
+	return text;
 }
 
 
@@ -470,14 +479,13 @@ int main() {
 	init_sdl();
 
 	SDL_Surface *img = load_image(path);
-	struct chat *cutted = cut(img);
+	struct text *cutted = cut(img);
 	struct matrix *mat_rlsa = rlsa(img, 10);
-	free_matrix(mat_rlsa->mat,img->w);
+	free_matrix(mat_rlsa);
 	free(mat_rlsa);	
-SDL_FreeSurface(img);
+	SDL_FreeSurface(img);
 	free(path);
-	free_char(0,cutted->nbline,cutted);
-	free(cutted);
+	free_text(cutted);
 	return 0;
 
 }

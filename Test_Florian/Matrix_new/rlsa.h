@@ -11,7 +11,6 @@
 # include <SDL/SDL.h>
 # include <SDL/SDL_image.h>
 
-# include "resize.h"
 # include "main.h"
 /////////////////////////////////////////                                       
 /*Struct declaration*/                                                          
