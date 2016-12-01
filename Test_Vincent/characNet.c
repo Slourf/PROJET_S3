@@ -23,7 +23,7 @@ void writeFile(char* path, float *a, size_t len)
     else
         errx(1, "Invalid path");
 }
- 
+
 /*---------Read a matrix from a file-----------*/
 void readFile(char *path, float *b, size_t len)
 {
@@ -43,7 +43,7 @@ void readFile(char *path, float *b, size_t len)
 
 /*==============End Read&Write file=============*/
 
- 
+
 /*=============Forward propagation============*/
 
 
