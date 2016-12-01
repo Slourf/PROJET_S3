@@ -37,8 +37,11 @@ SDL_Surface to_black_white(SDL_Surface *img);
 long** build_matrix(size_t x, size_t y);
 void print_dynmat(long **mat, size_t x, size_t y);
 void free_matrix(long **mat, int w);
-
+struct tTuple block_cut (long **mat, int width, int height);
 void copy(long **old_mat, long **new_mat, int x_l, int x_u, int y_l, int y_u);
 struct tuple line_cut(long **mat, int width, int height);
 struct tuple char_cut(long **mat, int width, int height);
+void stock_lines(long ***lines, long** img, int width, struct tuple coord);
+void stock_char(long ****chat, long ***lines, struct tuple nb_line, int width, int char_size);
+long**** cut(SDL_Surface *img);
 # endif
