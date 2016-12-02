@@ -4,6 +4,7 @@
 # include <assert.h>
 # include <err.h>
 # include "exploreFiles.h"
+# include "main.h"
 
 /*========== Read&Write matrix into file =========*/
 
@@ -33,7 +34,6 @@ void readFile(char *path, float *b, size_t len)
 				for (size_t i = 0; i < len; i++)
 				{
 						fscanf(file, "%f", (b+i));
-						++b;
 				}
 				fclose(file);
 		}
@@ -55,7 +55,7 @@ void initWeight( float* weight ,int r, int l)
 				int lineoffset = j*r ;
 				for (int i = 0 ; i < r ; ++i)
 				{
-						float rnd = ((float)rand()/(double)RAND_MAX);
+						float rnd = ((float)rand()/(double)RAND_MAX)*0.2-0.1;
 						weight[lineoffset+i] = rnd;
 				}
 		}
@@ -253,6 +253,7 @@ void training ()
 		float *hidden = malloc(nbHidden * sizeof(float));
 		float *wIH = malloc(nbHidden * (nbInput+1) * sizeof(float));
 		float *wHO = malloc(nbOutput * (nbHidden+1) * sizeof(float));
+		float *matrix_image = calloc (nbInput, sizeof(float));
 		initWeight(wIH, nbHidden, nbInput+1);
 		initWeight(wHO, nbOutput, nbHidden+1);
 		float *outputDelta = malloc(nbOutput * sizeof(float));
@@ -292,7 +293,7 @@ void training ()
 		writeFile("weightHO.txt"., wHO, nbOutput * (nbHidden + 1));
 }
 
-void single_forward ()
+char *single_forward ()
 {
 		//boucle repetant autant de fois que les carac a reconnaitre 
 		int nbInput = 15 *  15;
@@ -301,20 +302,24 @@ void single_forward ()
 		//int nbTests=20000000;
 		float *input = malloc(nbInput * sizeof(float));
 		float *outputs  = calloc(nbOutput * sizeof(float))
-
-				int *result = malloc(nbOutput * sizeof(int));
+		
+		float *matrix_image = calloc(nbInput, sizeof(float));
+		int *result = malloc(nbOutput * sizeof(int));
 		float *outexpected = malloc(nbOutput * sizeof(float));
 		float *output = malloc(nbOutput * sizeof(float));
 		float *hidden = malloc(nbHidden * sizeof(float));
 		float *wIH = malloc(nbHidden * (nbInput+1) * sizeof(float));
 		float *wHO = malloc(nbOutput * (nbHidden+1) * sizeof(float));
+
 		readFile("weightIH.txt", wIH, nbHidden * (nbInput + 1));                    
 		readFile("weightHO.txt"., wHO, nbOutput * (nbHidden + 1));
+
 		float *outputDelta = malloc(nbOutput * sizeof(float));
 		float *productDelta = malloc(nbHidden * sizeof(float));
 		float *deltaHidden = malloc(nbOutput* nbHidden* sizeof(float));
 		char *carac = malloc(nbchar * sizeof(char));
 		char ** characters = calloc(52 , sizeof(char*));
+
 		int index_input = 0;
 		int index_result = 0;
 		for (int i = 0; i < l; ++i)
@@ -340,6 +345,8 @@ void single_forward ()
 
 		carac[index_result] = fromBin (result, nbOutput);
 		++index_result;
+		
+		return carac;
 
 }
 
