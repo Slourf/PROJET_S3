@@ -130,6 +130,7 @@ void DeltaOutput(float *dst,float *Actual, float *Expect, int l)
 
 void deltaproduct(float *dst, float *W, float* delta, int c, int l)
 {
+		
 		float sum = 0.0;
 		for (int j = 1 ; j < l ; ++j)
 		{
@@ -203,9 +204,12 @@ void newWeight(float *W, float* M, float* Delta, float lr, int r, int l)
 				W[j] = W[j] - lr * Delta[j];
 				for (int i = 1 ; i < l ; ++i)
 				{
-						W[r*i + j] =W[r*i+j]- ( lr * Delta[j] * M[j]);
+					//	printf("%f = %f - %f * %f * %f\n",W[r*i+j],W[r*i+j], lr, Delta[j],M[i-1]);
+						W[r*i + j] =W[r*i+j]- ( lr * Delta[j] * M[i-1]);
+
 				}
 		}
+//		printf("\n");
 }
 
 /*This function convert a binary to a decimal*/
@@ -567,33 +571,61 @@ int main(int argc, char* argv[])
 		int nbInput = 2;
 		int nbOutput = 1;
 		int nbHidden = 2;
-		float *input = malloc(nbInput * sizeof(float));
+		float *input = calloc(nbInput , sizeof(float));
 		float inputs[] = { 1, 1, 0, 0, 0, 1, 1, 0 };
 		float outputs[] = { 0, 0, 1, 1 };
-		float *outexpected = malloc(nbOutput * sizeof(float));
-		float *output = malloc(nbOutput * sizeof(float));
-		float *hidden = malloc(nbHidden * sizeof(float));
-		float *wIH = malloc(nbHidden * (nbInput+1) * sizeof(float));
-		float *wHO = malloc(nbOutput * (nbHidden+1) * sizeof(float));
+		float *outexpected = calloc(nbOutput , sizeof(float));
+		float *output = calloc(nbOutput , sizeof(float));
+		float *hidden = calloc(nbHidden , sizeof(float));
+		float *wIH = calloc(nbHidden * (nbInput+1) , sizeof(float));
+
+		float *wHO = calloc(nbOutput * (nbHidden+1) , sizeof(float));
+
 		initWeight(wIH, nbHidden, nbInput+1);
 		initWeight(wHO, nbOutput, nbHidden+1);
-		float *outputDelta = malloc(nbOutput * sizeof(float));
-		float *productDelta = malloc(2 * sizeof(float));
-		float *deltaHidden = malloc(1* 2* sizeof(float));
+//		printf("wIH\n");
+//		printMatrix(wIH, nbHidden, nbInput+1);
+//		printf("wHO\n");
+//		printMatrix(wHO, nbOutput, nbHidden+1);
+		float *outputDelta = calloc(nbOutput , sizeof(float));
+		float *productDelta = calloc(2 , sizeof(float));
+		float *deltaHidden = calloc( 2, sizeof(float));
 
 		/*=======================Training loop======================*/
+
 		for (int t = 0 ; t < 100000 ; ++t)
 		{
+				
 				input[0] = inputs[2*(t%4)];
 				input[1] = inputs[2*(t%4)+1];
+//				printf("imput\n");
+//				printMatrix(input, 2,1);
 				outexpected[0] = outputs[t%4];
-				product(input, wIH, hidden, 2, 3);
+//				printf("outexpected\n");
+//				printMatrix(outexpected, 1,1);
+				product(input, wIH, hidden, nbInput, 3);
+//				printf("Hidden\n");
 				product(hidden, wHO, output, 1, 3);
+//				printMatrix(hidden,2,1);
+//				printf("output\n");
+//				printMatrix(output, 1,1);
 				DeltaOutput(outputDelta, output, outexpected, nbOutput );
-				deltaproduct(productDelta, wHO, outputDelta, 1, 2);
+//				printf("Outputdelta\n");
+//				printMatrix(outputDelta, 1,1);
+				deltaproduct(productDelta, wHO, outputDelta, 1, 3);
+//				printf("ProductDelta\n");
+//				printMatrix(productDelta, 1,2);
 				DeltaHidden(deltaHidden, productDelta, hidden, nbInput);
+//				printf("deltaHidden");
+//				printMatrix(deltaHidden, nbHidden, nbInput);
 				newWeight(wHO , hidden, outputDelta, 0.3, 1, 3);
+
 				newWeight(wIH , input, deltaHidden, 0.3, 2, 3);
+		
+//				printf("wIH\n");
+//				printMatrix(wIH, nbHidden, nbInput+1);
+//				printf("wHO\n");
+//				printMatrix(wHO, nbOutput, nbHidden+1);
 		}
 		/*===================End of training loop======================*/
 		if (argc == 1)

@@ -1,6 +1,6 @@
 CC=gcc
 CPPFLAGS=-MMD `pkg-config --cflags sdl`
-CFLAGS=-Wall -Wextra -std=c99 -O2
+CFLAGS=-Wall -Wextra -std=c99 -O2 -g
 LDFLAGS=
 LDLIBS=-lm `pkg-config --libs sdl` -lSDL_image
 
