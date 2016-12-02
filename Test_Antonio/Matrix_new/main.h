@@ -67,7 +67,7 @@ struct matrix* build_matrix(size_t x, size_t y);
 void print_dynmat(struct matrix *mat);
 void free_matrix(struct matrix *mat);
 struct tTuple block_cut (struct matrix *mat);
-void copy(struct matrix *old_mat, struct matrix *new_mat, int x_u, int y_u);
+void copy(struct matrix *old_mat, struct matrix *new_mat, int x_l, int x_u, int y_u);
 struct tuple line_cut(struct matrix *mat);
 struct tuple char_cut(struct matrix *mat);
 void stock_lines(struct line *line, struct matrix *img, struct tuple coord);

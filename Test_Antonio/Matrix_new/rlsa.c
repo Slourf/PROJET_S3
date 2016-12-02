@@ -129,7 +129,7 @@ struct block* append_block(struct block *block, struct block *new) {
 void stock_lines_rlsa(struct lines *lines, struct matrix *img, struct tuple coord) {
     for (int i = 0; i < coord.length; ++i) {
 	struct matrix *m = build_matrix(img->w, coord.coord[i].y - coord.coord[i].x + 1);
-        copy(img, m, img->w - 1, 0, coord.coord[i].y, coord.coord[i].x);
+        copy(img, m, img->w - 1, 0, coord.coord[i].x);
 	m->w = img->w - 1;
 	m->h = coord.coord[i].y - coord.coord[i].x;
         lines->mat[i] = m;

@@ -100,8 +100,8 @@ struct matrix* build_matrix(size_t w, size_t h) {
     struct matrix *m = malloc(sizeof (struct matrix));
 	long **mat;
     mat = calloc(w, sizeof (long *));
-    for (size_t i = 0; i < w; ++i)
-        mat[i] = calloc(h, sizeof (long));
+	for (size_t i = 0; i < w; ++i)
+		mat[i] = calloc(h, sizeof (long));
 	m->data = mat;
 	m->h = h;
 	m->w = w;
@@ -109,6 +109,7 @@ struct matrix* build_matrix(size_t w, size_t h) {
 }	
 
 struct line* build_line(size_t length) {
+	printf("len = %zu\n", length);
 	struct line *l = calloc(1, sizeof (struct line));
 	l->size = length;
 	l->mat = calloc(length, sizeof (struct matrix*));
@@ -232,10 +233,12 @@ int get_lower_x(struct matrix *mat) {
     return columnX;
 }
 
-void copy(struct matrix *old_mat, struct matrix *new_mat, int x_u, int y_u) {
+void copy(struct matrix *old_mat, struct matrix *new_mat, int x_l, int x_u, int y_u) {
+	printf("w = %zu h = %zu x_u = %d\n", new_mat->w, new_mat->h, x_u);
 
-	for (size_t i = 0; i < new_mat->w; ++i) {
+	for (int i = 0; i <= (x_l - x_u); ++i) {
 		for(size_t j = 0 ; j < new_mat->h; ++j) {
+	//		printf("i = %zu; j = %zu\n", i, j);
 			new_mat->data[i][j] = old_mat->data[x_u + i][y_u + j];
 		}
 	}
@@ -317,7 +320,7 @@ struct tuple line_cut(struct matrix *mat) {
 void stock_lines(struct line *line, struct matrix *img, struct tuple coord) {
 	for (int i = 0; i < coord.length; ++i) {
 		struct matrix *m = build_matrix(img->w, coord.coord[i].y - coord.coord[i].x + 1);
-		copy(img, m, 0, coord.coord[i].x);
+		copy(img, m, img->w - 1, 0, coord.coord[i].x);
 		line->mat[i] = m;
 	}
 }
@@ -339,18 +342,18 @@ struct tuple char_cut(struct matrix *mat)
 		size_t y = 0;
         c = 0;
         while (y < mat->h && c == 0) {
-	    if (mat->data[x][y] == 1) {
-		c = 1;
-            }
+	    	if (mat->data[x][y] == 1) {
+				c = 1;
+        	}
             ++y;
     	}
     	if(c == 1) {
 	    	if (w == 1) {
-				if (blank_count > aver_size_char+1) {
+				if (blank_count > aver_size_char + 1) {
 		   			++nbchar;
 		   			list = realloc(list, nbchar * sizeof(struct coord));
 		   			list[nbchar - 1].x = x_top+blank_count-1;
-		   			list[nbchar - 1].y = x-1;
+		   			list[nbchar - 1].y = x;
 		   			blank_count = 0;
 				}
 				x_top = x;
@@ -361,7 +364,7 @@ struct tuple char_cut(struct matrix *mat)
 	       		aver_size_char = (aver_size_char * (nbchar - 1) + x - x_top) / nbchar;
 	       		list = realloc(list, nbchar * sizeof(struct coord));
                	list[nbchar - 1].x = x_top;
-               	list[nbchar - 1].y = x;
+               	list[nbchar - 1].y = x - 1;
             }
         	b = 1;
     	}
@@ -387,25 +390,31 @@ struct tuple char_cut(struct matrix *mat)
 
 void stock_char(struct text *text, struct line *line, struct tuple nb_line, int char_size) {
 	for (int j = 0; j < nb_line.length; ++j) {
-		struct tuple char_in_line = char_cut(line->mat[j]); 
+		struct tuple char_in_line = char_cut(line->mat[j]);
 		struct line *l = build_line(char_in_line.length);
-		for (int i = 0; i < (int)line->size; ++i) {
+		printf("size = %d, true_size = %zu\n", char_in_line.length, line->size);
+		for (int i = 0; i < char_in_line.length; ++i) {
+			printf("pass\n");
 			struct matrix *m = 	build_matrix(char_in_line.coord[i].y - 	
 						char_in_line.coord[i].x + 2,
 						nb_line.coord[j].y - 
 						nb_line.coord[j].x + 2);
-			copy(line->mat[j], m, char_in_line.coord[i].x, 0);
+			printf("mat_h = %zu mat_w = %zu char_x = %d\n",
+				line->mat[j]->h, line->mat[j]->w, char_in_line.coord[i].x);
+			copy(line->mat[j], m, char_in_line.coord[i].y ,char_in_line.coord[i].x, 0);
+			printf("pass2\n");
 			struct tTuple t = block_cut(m);
 			struct matrix *block = build_matrix(t.x_l - t.x_u + 1, 
 							t.y_l - t.y_u + 1);
 			printf("copy\n");
 			printf("m_w %zu m_h = %zu && x = %d y = %d\n", 
 					block->h, block->w, t.x_l - t.x_u, t.y_l - t.y_u);
-			copy(m, block, t.x_u, t.y_u);
+			copy(m, block, t.x_l - 1, t.x_u, t.y_u);
 			printf("ward\n");
 			l->mat[i] = resize_char(block, char_size);
 			print_dynmat(l->mat[i]);
 			printf("\n");
+		
 		}
 		++text->size;
 		text->line[j] = l;
@@ -439,9 +448,9 @@ struct text *cut(SDL_Surface *img) {
 	/*First cutting*/
 	struct tTuple t = block_cut(mat_img);
 	struct matrix *block = build_matrix(t.x_l - t.x_u + 1, t.y_l - t.y_u + 1);
-	copy(mat_img, block, t.x_u, t.y_u);
+	copy(mat_img, block, t.x_l, t.x_u, t.y_u);
 	printf("pass1\n");
-//	print_dynmat(block, t.x_l - t.x_u + 1, t.y_l - t.y_u + 1);
+	print_dynmat(block);
 //	printf("\n");
 
 	free_matrix(mat_img);
@@ -452,16 +461,17 @@ struct text *cut(SDL_Surface *img) {
 	struct line *lines = build_line(nb_lines.length);
 	stock_lines(lines, block, nb_lines);
 	printf("pass2\n");	
-/*
-	for (int i = 0; i < nb_lines.length; ++i) {
-		print_dynmat(lines[i],width,nb_lines.coord[i].y-nb_lines.coord[i].x);
+
+	for (size_t i = 0; i < lines->size; ++i) {
+		print_dynmat(lines->mat[i]);
 		printf("\n");
 	}
- */
+
 	free_matrix(block);
 	printf("free2\n");
 	/*Characters cutting*/
 	struct text *text = build_text(nb_lines.length);
+	printf("%d\n", nb_lines.length);
 	stock_char(text, lines, nb_lines, 15);
 	printf("pass3\n");
 	free_lines(lines);
