@@ -3,8 +3,11 @@
 # include <math.h>
 # include <assert.h>
 # include <err.h>
+# include <SDL.h>
+# include <sys/types.h>
+# include <dirent.h>
 # include "exploreFiles.h"
-# include "main.h"
+//# include "main.h"
 
 /*========== Read&Write matrix into file =========*/
 
@@ -97,7 +100,7 @@ void product(float *in, float *w, float *o, int r, int l)
  *This function is done
  */
 /*This function compute the delta value for the output layer*/
-/*
+
    void DeltaOutput(float *dst,float *Actual, float *Expect, int l)
    {
    for (int j = 0 ; j < l ; ++j)
@@ -106,8 +109,8 @@ void product(float *in, float *w, float *o, int r, int l)
    Actual[j] * (1 - Actual[j]);
    }
    }
- */
-
+ 
+/*
 void DeltaOutput(float *dst,float *Actual, float *Expect, int r, int l)
 {
 		for (int j = 0 ; j < l ; ++j)
@@ -116,12 +119,12 @@ void DeltaOutput(float *dst,float *Actual, float *Expect, int r, int l)
 				for (int i = 0 ; i < r ; ++i)
 				{
 						dst[lineoffset + i] = (Actual[lineoffset+i] - 
-						Expect[lineoffset+i])*Actual[lineoffset+i] * 
-						(1 - Actual[lineoffset+i]);
+										Expect[lineoffset+i])*Actual[lineoffset+i] * 
+								(1 - Actual[lineoffset+i]);
 				}
 		}
 }
-
+*/
 
 /*This fuction compute the product of the delta of output layer and weight
   between hidden layer and output layer*/
@@ -157,7 +160,7 @@ void deltaproduct(float *dst, float *W, float* delta, int c, int l)
  */
 
 /*This function compute the delta value for the hidden layer*/
-/*
+
    void DeltaHidden(float *dst, float *delta, float *hidden, int l)
    {
    for (int i = 0; i < l; ++i)
@@ -165,10 +168,11 @@ void deltaproduct(float *dst, float *W, float* delta, int c, int l)
    dst[i] = hidden[i] * (1 - hidden[i])* delta[i];
    }
    }
- */
+ 
 /*
    This function compute the delta value for the hidden layer
  */
+/*
 void DeltaHidden(float *dst, float *delta, float *hidden, int c, int l)
 {
 		float sum = 0;
@@ -189,7 +193,7 @@ void DeltaHidden(float *dst, float *delta, float *hidden, int c, int l)
 				}
 		}
 }
-
+*/
 
 /*This function update the weights after observing the error rate between
   actuel result and expected result*/
@@ -246,120 +250,144 @@ void training ()
 		int nbOutput = 7;
 		int nbHidden = 15 * 15;
 		//int nbTests=20000000;
-		float *input = malloc(nbInput * sizeof(float));
-		float *outputs = calloc(nbOutput * sizeof(float));
+		float *input = calloc(nbInput, sizeof(float));
+		float *outputs = calloc(nbOutput, sizeof(float));
 
-		float *outexpected = malloc(nbOutput * sizeof(float));
-		float *output = malloc(nbOutput * sizeof(float));
-		float *hidden = malloc(nbHidden * sizeof(float));
-		float *wIH = malloc(nbHidden * (nbInput+1) * sizeof(float));
-		float *wHO = malloc(nbOutput * (nbHidden+1) * sizeof(float));
+		float *outexpected = calloc(nbOutput, sizeof(float));
+		float *output = calloc(nbOutput, sizeof(float));
+		float *hidden = calloc(nbHidden, sizeof(float));
+		float *wIH = calloc(nbHidden * (nbInput+1), sizeof(float));
+		float *wHO = calloc(nbOutput * (nbHidden+1), sizeof(float));
 		float *matrix_image = calloc (nbInput, sizeof(float));
 		initWeight(wIH, nbHidden, nbInput+1);
 		initWeight(wHO, nbOutput, nbHidden+1);
-		float *outputDelta = malloc(nbOutput * sizeof(float));
-		float *productDelta = malloc(nbHidden * sizeof(float));
-		float *deltaHidden = malloc(nbOutput* nbHidden* sizeof(float));
+		float *outputDelta = calloc(nbOutput, sizeof(float));
+		float *productDelta = calloc(nbHidden, sizeof(float));
+		float *deltaHidden = calloc(nbOutput* nbHidden, sizeof(float));
 		char ** characters = calloc(52, sizeof(float*));
+
 		int iter_char = 0;
 		fileName(52, characters);
 		char chr = characters[iter_char];
-		struct dirent *reading;
-		DIR * dir = opendir("CharFile/" + chr);
-		while(reading = readdir(dir)){
-				//appel fonction image->matrice
-				int index_input = 0;
-				for (int i = 0; i < 15; ++i)
-				{
-						int lineofset = i * 15;
-						for (int j = 0; j < 15; ++j)
-						{
-								input[index_input] = matrix_image[lineofset + j];
-								++index_input;
+		struct dirent *charFileRead;
+		DIR * mainFile = opendir("CharFile");
+		while(charFileRead = readdir(mainFile)){
+				DIR *charFile = opendir(charFileRead->name);
+				struct dirent character;
+				SDL_Surface * img = load_image(charFileRead -> d_name);
+				struct text chr = cut(img);
+				while(character = readdir(charFile)){
+						int index_input = 0;
+						for (int x = 0; x < 15; ++x)
+						{	 
+								for (int y = 0; y < 15; ++y)
+								{
+										input[index_input] = 
+											txt->line[0]->->mat[0]->data[x][y];
+										++index_input;
+								}
 						}
+						index_input = 0;
+
+						toBin(outexpected, chr);
+
+						product(input, wIH, hidden, nbhidden, nbinput + 1);                                       
+						product(hidden, wHO, output, nbOutput, nbhidden + 1);                                      
+						DeltaOutput(outputDelta, output, outexpected, nbOutput);                   
+						deltaproduct(productDelta, wHO, outputDelta, 1, 2);                      
+						DeltaHidden(deltaHidden, productDelta, hidden, 1,2);                     
+						newWeight(wHO , hidden, outputDelta, 0.3, nbOutput, nbhidden+1);                         
+						newWeight(wIH , input, deltaHidden, 0.3, nbhidden, nbhidden+1);
+
+
+
 				}
-				//a verifier cette ligne 
-				toBin(outexpected, chr);
+				++iter_char;
+				//appel fonction image->matrice
 		}
-	
-		product(input, wIH, hidden, nbhidden, nbinput + 1);                                       
-        product(hidden, wHO, output, nboutput, nbhidden + 1);                                      
-        DeltaOutput(outputDelta, output, outexpected, 1 , nbOutput);                   
-        deltaproduct(productDelta, wHO, outputDelta, 1, 2);                      
-        DeltaHidden(deltaHidden, productDelta, hidden, 1,2);                     
-        newWeight(wHO , hidden, outputDelta, 0.3, 1, 3);                         
-        newWeight(wIH , input, deltaHidden, 0.3, 2, 3);
 
 		writeFile("weightIH.txt", wIH, nbHidden * (nbInput + 1));                    
 		writeFile("weightHO.txt"., wHO, nbOutput * (nbHidden + 1));
 }
 
-char *single_forward ()
+char *single_forward (struct text *img)
 {
 		
-		struct text *txt = cut(img);
 		//boucle repetant autant de fois que les carac a reconnaitre 
 		//txt->line[i]->->mat[j];
 
 
 		int index_result = 0;
-		for (int i = 0; i < txt->size; ++i)
-		{
-			for (int j = 0; j < txt->line[i]->size; ++j)
-		{
 		int nbInput = 15 *  15;
 		int nbOutput = 7;
 		int nbHidden = 15 * 15;
-		float *input = malloc(nbInput * sizeof(float));
-		float *outputs  = calloc(nbOutput * sizeof(float))
-		
+		float *input = calloc(nbInput, sizeof(float));
+		float *outputs  = calloc(nbOutput, sizeof(float));
+
 		float *matrix_image = calloc(nbInput, sizeof(float));
-		int *result = malloc(nbOutput * sizeof(int));
-		float *outexpected = malloc(nbOutput * sizeof(float));
-		float *output = malloc(nbOutput * sizeof(float));
-		float *hidden = malloc(nbHidden * sizeof(float));
-		float *wIH = malloc(nbHidden * (nbInput+1) * sizeof(float));
-		float *wHO = malloc(nbOutput * (nbHidden+1) * sizeof(float));
+		int *result = calloc(nbOutput, sizeof(int));
+		float *outexpected = calloc(nbOutput, sizeof(float));
+		float *output = calloc(nbOutput, sizeof(float));
+		float *hidden = calloc(nbHidden, sizeof(float));
+		float *wIH = calloc(nbHidden * (nbInput+1), sizeof(float));
+		float *wHO = calloc(nbOutput * (nbHidden+1), sizeof(float));
 
 		readFile("weightIH.txt", wIH, nbHidden * (nbInput + 1));                    
 		readFile("weightHO.txt"., wHO, nbOutput * (nbHidden + 1));
-
-		float *outputDelta = malloc(nbOutput * sizeof(float));
-		float *productDelta = malloc(nbHidden * sizeof(float));
-		float *deltaHidden = malloc(nbOutput* nbHidden* sizeof(float));
-		char *carac = malloc(nbchar * sizeof(char));
-		char ** characters = calloc(52 , sizeof(char*));
-
-		int index_input = 0;
-		index_result += 1;
-		//appel image -> matrix
-		for (int x = 0; x < 15; ++x)
-		{ 
-				for (int y = 0; y < 15; ++y)
-				{
-						input[index_input] = txt->line[i]->->mat[j]->data[x][y];
-						++index_input;
-				}
-		}
-		index_input = 0;
-		product(input, wIH, hidden, 2,3);
-		product(hidden, wHO, output, 1, 3);
-
-		for(int i = 0; i < nbOutput; ++i)
+		
+		int nbChar = 0;
+		for (int i = 0; i < txt->size; ++i)
 		{
-				if(output[i] > 0.5)
-						result[i] = 1;
-				else 
-						result[i] = 0;
+				for (int j = 0; j < txt->line[i]->size; ++j)
+					++nbChar;
 		}
 
-		carac[index_result] = fromBin (result, nbOutput);
-		++index_result;
-		}
+
+		float *outputDelta = calloc(nbOutput, sizeof(float));
+		float *productDelta = calloc(nbHidden, sizeof(float));
+		float *deltaHidden = calloc(nbOutput* nbHidden, sizeof(float));
+		char *carac = calloc(nbChar, sizeof(char));
+		char ** characters = calloc(52 , sizeof(char*));
+		for (int i = 0; i < txt->size; ++i)
+		{
+				for (int j = 0; j < txt->line[i]->size; ++j)
+				{
+
+						int index_input = 0;
+						for (int x = 0; x < 15; ++x)
+						{
+								for (int y = 0; y < 15; ++y)
+								{
+										input[index_input] = 
+										txt->line[i]->->mat[j]->data[x][y];
+										++index_input;
+								}
+						}
+						index_input = 0;
+						product(input, wIH, hidden, nbInput,nbInput+1);
+						product(hidden, wHO, output, nbOutput, nbhidden+1);
+
+						for(int i = 0; i < nbOutput; ++i)
+						{
+								if(output[i] > 0.5)
+										result[i] = 1;
+								else 
+										result[i] = 0;
+						}	
+
+						carac[index_result] = fromBin (result, nbOutput);
+						++index_result;
+				}
 		}
 		return carac;
 
 }
+/*
+int main ()
+{
+	return 0;
+}
+*/
 
 int main(int argc, char* argv[])
 {
@@ -438,7 +466,7 @@ int main(int argc, char* argv[])
 				printMatrix(wIH, nbInput, nbHidden+1);
 
 		}
-		/*
+		
 		   for (int i = 0 ; i < 8 ; ++i)
 		   {
 		   input[0] = inputs[i%8];
@@ -453,7 +481,6 @@ int main(int argc, char* argv[])
 		printf("\n");
 
 		}
-		 */
 
 
 		/*		printf("%i = ",(int)input[0]);

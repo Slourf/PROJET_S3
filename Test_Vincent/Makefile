@@ -1,19 +1,20 @@
 CC=gcc
-CPPFLAGS=-MMD
+CPPFLAGS=-MMD `pkg-config --cflags sdl`
 CFLAGS=-Wall -Wextra -std=c99 -O2
 LDFLAGS=
-LDLIBS=-lm
+LDLIBS=-lm `pkg-config --libs sdl` -lSDL_image
 
-SRC= XOR_function.c
+SRC= IntToBin_Net.c
 OBJ=${SRC:.c=.o}
+CUT= main.o pixel_operations.o
 DEP=${SRC:.c=.d}
 PRG=${SRC:.c=}
 
-all: ${PRG}
+all: IntToBin_Net main
 
-XOR: XOR_function
+main: ${CUT}
 
-SEG: 
+IntToBin_net: IntToBin_Net
 
 clean:
 	${RM} ${OBJ} ${DEP} ${PRG}
