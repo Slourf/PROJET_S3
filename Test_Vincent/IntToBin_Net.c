@@ -115,8 +115,9 @@ void DeltaOutput(float *dst,float *Actual, float *Expect, int r, int l)
 				int lineoffset = j * r;
 				for (int i = 0 ; i < r ; ++i)
 				{
-						dst[lineoffset + i] = (Actual[lineoffset+i] - Expect[lineoffset+i])*
-								Actual[lineoffset+i] * (1 - Actual[lineoffset+i]);
+						dst[lineoffset + i] = (Actual[lineoffset+i] - 
+						Expect[lineoffset+i])*Actual[lineoffset+i] * 
+						(1 - Actual[lineoffset+i]);
 				}
 		}
 }
@@ -268,10 +269,10 @@ void training ()
 		while(reading = readdir(dir)){
 				//appel fonction image->matrice
 				int index_input = 0;
-				for (int i = 0; i < l; ++i)
+				for (int i = 0; i < 15; ++i)
 				{
-						int lineofset = i * l;
-						for (int j = 0; j < c; ++c)
+						int lineofset = i * 15;
+						for (int j = 0; j < 15; ++j)
 						{
 								input[index_input] = matrix_image[lineofset + j];
 								++index_input;
@@ -282,8 +283,8 @@ void training ()
 		}
 	
 		product(input, wIH, hidden, nbhidden, nbinput + 1);                                       
-        product(hidden, wHO, output, nboutput, nbhidden+1);                                      
-        DeltaOutput(outputDelta, output, outexpected, 1 , 1 );                   
+        product(hidden, wHO, output, nboutput, nbhidden + 1);                                      
+        DeltaOutput(outputDelta, output, outexpected, 1 , nbOutput);                   
         deltaproduct(productDelta, wHO, outputDelta, 1, 2);                      
         DeltaHidden(deltaHidden, productDelta, hidden, 1,2);                     
         newWeight(wHO , hidden, outputDelta, 0.3, 1, 3);                         
@@ -295,11 +296,20 @@ void training ()
 
 char *single_forward ()
 {
+		
+		struct text *txt = cut(img);
 		//boucle repetant autant de fois que les carac a reconnaitre 
+		//txt->line[i]->->mat[j];
+
+
+		int index_result = 0;
+		for (int i = 0; i < txt->size; ++i)
+		{
+			for (int j = 0; j < txt->line[i]->size; ++j)
+		{
 		int nbInput = 15 *  15;
 		int nbOutput = 7;
 		int nbHidden = 15 * 15;
-		//int nbTests=20000000;
 		float *input = malloc(nbInput * sizeof(float));
 		float *outputs  = calloc(nbOutput * sizeof(float))
 		
@@ -321,13 +331,13 @@ char *single_forward ()
 		char ** characters = calloc(52 , sizeof(char*));
 
 		int index_input = 0;
-		int index_result = 0;
-		for (int i = 0; i < l; ++i)
-		{
-				int lineofset = i * l;
-				for (int j = 0; j < c; ++c)
+		index_result += 1;
+		//appel image -> matrix
+		for (int x = 0; x < 15; ++x)
+		{ 
+				for (int y = 0; y < 15; ++y)
 				{
-						input[index_input] = matrix_image[lineofset + j];
+						input[index_input] = txt->line[i]->->mat[j]->data[x][y];
 						++index_input;
 				}
 		}
@@ -345,7 +355,8 @@ char *single_forward ()
 
 		carac[index_result] = fromBin (result, nbOutput);
 		++index_result;
-		
+		}
+		}
 		return carac;
 
 }
