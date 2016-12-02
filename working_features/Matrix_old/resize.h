@@ -5,6 +5,7 @@
 
 # include <stdlib.h>
 # include <stdio.h>
+
 long** resize_char(long **mat, int width, int height, int size);
 
 # endif
