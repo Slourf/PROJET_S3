@@ -420,7 +420,6 @@ void free_text(struct text *text){
 struct text *cut(SDL_Surface *img) {
 
 	/*Generating the matrix*/
-	display_image(img);
   	struct matrix *mat_img = build_matrix(img->w, img->h);
   	*img = to_black_white(img);
   	img2mat(img, mat_img);
@@ -445,7 +444,7 @@ struct text *cut(SDL_Surface *img) {
 	return text;
 }
 
-/*
+
 int main() {
   	char *path = malloc(256);
   	printf("Please enter the path to your image: ");
@@ -454,7 +453,6 @@ int main() {
 	init_sdl();
 
 	SDL_Surface *img = load_image(path);
-	struct text *cutted = cut(img);
 //	struct matrix *mat_rlsa = rlsa(img, 10);
 //	free_matrix(mat_rlsa);
 	SDL_FreeSurface(img);
@@ -462,4 +460,4 @@ int main() {
 	free_text(cutted);
 	return 0;
 
-}*/
+}
