@@ -1,1 +1,1 @@
-char *single_forward ();
+char *single_forward (struct text *img);
