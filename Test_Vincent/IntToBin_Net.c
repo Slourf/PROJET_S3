@@ -381,7 +381,7 @@ return carac;
 
 }*/
 
-
+/*
 int main(int argc, char* argv[])
 {
 		int nbInput = 3;
@@ -406,10 +406,10 @@ int main(int argc, char* argv[])
 		initWeight(wHO, nbOutput, nbHidden+1);
 		float *outputDelta = malloc(nbOutput * sizeof(float));
 		float *productDelta = malloc(nbHidden * sizeof(float));
-		float *deltaHidden = malloc(nbOutput* nbHidden* sizeof(float));
+		float *deltaHidden = malloc(nbOutput* nbHidden* sizeof(float));*/
 
 		/*=======================Training loop======================*/
-		for (int t = 0 ; t < 10000 ; ++t)
+/*		for (int t = 0 ; t < 10000 ; ++t)
 		{
 				input[0] = inputs[(3*t%4)%12];
 				input[1] = inputs[(3*t+1)%12];
@@ -447,7 +447,7 @@ int main(int argc, char* argv[])
 				newWeight(wHO , hidden, outputDelta, 0.3, nbOutput, nbHidden+1);
 
 				newWeight(wIH , input, deltaHidden, 0.3, nbHidden, nbInput+1);
-				/*		printf("Input = %f\n", input[0]);
+						printf("Input = %f\n", input[0]);
 						printf("\nOutexpected:\n");
 						printMatrix(outexpected, 1, 4);
 						printf("\nWeight Input to Hidden\n");
@@ -467,7 +467,7 @@ int main(int argc, char* argv[])
 						printf("\nNew wIH:\n");
 						printMatrix(wIH, nbInput, nbHidden+1);
 				 */
-		}
+/*		}
 
 		for (int i = 0 ; i < 4 ; ++i)
 		{
@@ -484,7 +484,7 @@ int main(int argc, char* argv[])
 
 		}
 }
-
+*/
 /*		printf("%i = ",(int)input[0]);
 		for (int j = 0 ; j < 4; ++j)
 		{
@@ -574,7 +574,7 @@ printf("\n");
 	return 0;
 	}*/
 
-/*
+
    int main(int argc, char* argv[])
    {
    int nbInput = 2;
@@ -599,9 +599,9 @@ printf("\n");
 float *outputDelta = calloc(nbOutput , sizeof(float));
 float *productDelta = calloc(2 , sizeof(float));
 float *deltaHidden = calloc( 2, sizeof(float));
- */
+
 /*=======================Training loop======================*/
-/*
+
    for (int t = 0 ; t < 100000 ; ++t)
    {
 
@@ -636,8 +636,8 @@ newWeight(wIH , input, deltaHidden, 0.3, nbHidden, nbInput+1);
 //				printf("wHO\n");
 //				printMatrix(wHO, nbOutput, nbHidden+1);
 }
- */		/*===================End of training loop======================*/
-/*		if (argc == 1)
+		/*===================End of training loop======================*/
+		if (argc == 1)
 		{
 		input[0] = 1;
 		input[1] = 1;
@@ -698,4 +698,4 @@ newWeight(wIH , input, deltaHidden, 0.3, nbHidden, nbInput+1);
 		free(deltaHidden);
 		return 0;
 		}
- */
+
