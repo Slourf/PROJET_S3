@@ -31,8 +31,7 @@ int main(){
 	int count = 0 ;
 	for (int i = 0 ; i < 52 ; ++i){
 		path[9] = chr[i];
-		printf("%s\n", path);
-		DIR* dir = opendir(path);
+		DIR* dir= opendir(path);
 		if (dir){
 			while((reading = readdir(dir))){
 				if (reading->d_name[0] != '.'){
@@ -42,6 +41,6 @@ int main(){
 		}
 		closedir(dir);
 	}
-	printf("%i", count);
+	free(path);
 }
 */
