@@ -117,7 +117,7 @@ struct line* build_line(size_t length) {
 
 struct text* build_text(size_t length) {
 	struct text *txt = calloc(1, sizeof (struct text));
-	txt->size = length;
+	txt->size = 0;
 	txt->line = calloc(length, sizeof (struct line*));
 	return txt;
 }
@@ -125,9 +125,24 @@ struct text* build_text(size_t length) {
 void free_matrix(struct matrix *mat) {
 	for (size_t i = 0; i < mat->w; ++i)
 		free(*(mat->data + i));
+	free(mat->data);
 	free(mat);
 }
 
+void free_lines(struct line *l){
+    for (size_t i = 0; i < l->size; ++i)
+        free_matrix(l->mat[i]);
+    free(l->mat);
+    free(l);    
+}
+
+void free_text(struct text *text){
+    for (size_t i = 0; i < text->size; ++i) {
+        free_lines(text->line[i]);
+    }
+    free(text->line);
+    free(text);
+}
 
 void img2mat(SDL_Surface *img, struct matrix *mat) {
     for (int x = 0; x < img->w; ++x) {
@@ -400,43 +415,37 @@ void stock_char(struct text *text, struct line *line, struct tuple nb_line, int 
 							t.y_l - t.y_u + 1);
 			copy(m, block, t.x_l - 1, t.x_u, t.y_u);
 			l->mat[i] = resize_char(block, char_size);
+
+			free_matrix(block);
+			free_matrix(m);
 		}
+		free(char_in_line.coord);
+		++text->size;
 		text->line[j] = l;
 	}
 }
 
-void free_lines(struct line *l){
-	for (size_t i = 0; i < l->size; ++i)
-		free_matrix(l->mat[i]);
-	free(l);	
-}
-
-void free_text(struct text *text){
-	for (size_t i = 0; i < text->size; ++i)
-		free_lines(text->line[i]);
-	free(text);
-}
 
 struct text *cut(SDL_Surface *img) {
 
-	/*Generating the matrix*/
+	//Generating the matrix*/
   	struct matrix *mat_img = build_matrix(img->w, img->h);
   	*img = to_black_white(img);
   	img2mat(img, mat_img);
-	/*First cutting*/
+	//First cutting*/
 	struct tTuple t = block_cut(mat_img);
 	struct matrix *block = build_matrix(t.x_l - t.x_u + 1, t.y_l - t.y_u + 1);
 	copy(mat_img, block, t.x_l, t.x_u, t.y_u);
 
 	free_matrix(mat_img);
-	/*Line cutting*/
+	//Line cutting
 	struct tuple nb_lines = line_cut(block);
 
 	struct line *lines = build_line(nb_lines.length);
 	stock_lines(lines, block, nb_lines);
 
 	free_matrix(block);
-	/*Characters cutting*/
+	//Characters cutting
 	struct text *text = build_text(nb_lines.length);
 	stock_char(text, lines, nb_lines, 15);
 	free_lines(lines);
@@ -451,13 +460,18 @@ int main() {
   	if(scanf("%256s", path) != 1)
         return -1; 
 	init_sdl();
+	
+	
 
 	SDL_Surface *img = load_image(path);
+	
+	struct text *cutted = cut(img);
 //	struct matrix *mat_rlsa = rlsa(img, 10);
 //	free_matrix(mat_rlsa);
 	SDL_FreeSurface(img);
 	free(path);
 	free_text(cutted);
+	printf("DONE\n");
 	return 0;
 
 }

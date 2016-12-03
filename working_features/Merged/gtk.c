@@ -79,7 +79,7 @@ void load_image_gtk(GtkButton *button, gpointer data) {
 		}
 	}
 }
-
+/*
 int main(int argc, char **argv)
 {
 	init_sdl();
@@ -158,4 +158,4 @@ int main(int argc, char **argv)
 
     return EXIT_SUCCESS;
 }
-
+*/
