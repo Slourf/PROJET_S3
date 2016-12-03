@@ -74,7 +74,7 @@ void load_image_gtk(GtkButton *button, gpointer data) {
 		}
 	}
 }
-
+/*
 int main(int argc, char **argv)
 {
 	init_sdl();
@@ -86,7 +86,7 @@ int main(int argc, char **argv)
 
     gtk_init(&argc, &argv);
 	
-    /*Création de la fenetre*/
+    //Création de la fenetre
 
     MainWindow = gtk_window_new(GTK_WINDOW_TOPLEVEL);
     g_signal_connect(G_OBJECT(MainWindow), "delete-event", 
@@ -96,7 +96,7 @@ int main(int argc, char **argv)
     gtk_window_set_title(GTK_WINDOW(MainWindow), "IRIS by Eye for an eye");
     gtk_window_set_position(GTK_WINDOW(MainWindow), GTK_WIN_POS_CENTER);
     
-    /*Création de la table*/
+    //Création de la table
 
     Table = gtk_table_new(10, 5, TRUE);
     gtk_container_add(GTK_CONTAINER(MainWindow), GTK_WIDGET(Table));
@@ -117,7 +117,7 @@ int main(int argc, char **argv)
     gtk_entry_set_max_length (GTK_ENTRY (entry),0);
     gtk_table_attach_defaults(GTK_TABLE(Table), entry, 1, 5, 8, 9); 
 	data->entry = entry;
-	/*Création du Bouton*/
+	//Création du Bouton
     //Bouton 1
 
     Button[0] = gtk_button_new_with_label("Quit");
@@ -153,4 +153,4 @@ int main(int argc, char **argv)
 
     return EXIT_SUCCESS;
 }
-
+*/
