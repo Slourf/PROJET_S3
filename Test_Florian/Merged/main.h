@@ -30,9 +30,7 @@ struct text {
 };
 
 struct block {    
-        int black_pixel;    
-        int ori_black_pixel;    
-        size_t Xmin, Ymin, delX, delY;    
+		size_t Xmin, Ymin, delX, delY;    
         int wb_trans;    
         struct block *next;    
 };    

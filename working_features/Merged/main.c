@@ -401,6 +401,8 @@ struct tuple char_cut(struct matrix *mat)
 
 
 void stock_char(struct text *text, struct line *line, struct tuple nb_line, int char_size) {
+	if (char_size)
+		printf("\n");
 	for (int j = 0; j < nb_line.length; ++j) {
 		struct tuple char_in_line = char_cut(line->mat[j]);
 		struct line *l = build_line(char_in_line.length);
@@ -410,16 +412,19 @@ void stock_char(struct text *text, struct line *line, struct tuple nb_line, int 
 						nb_line.coord[j].y - 
 						nb_line.coord[j].x + 2);
 			copy(line->mat[j], m, char_in_line.coord[i].y ,char_in_line.coord[i].x, 0);
+			print_dynmat(m);
 			struct tTuple t = block_cut(m);
 			struct matrix *block = build_matrix(t.x_l - t.x_u + 1, 
 							t.y_l - t.y_u + 1);
 			copy(m, block, t.x_l - 1, t.x_u, t.y_u);
-			l->mat[i] = resize_char(block, char_size);
+			l->mat[i] = blockresize_char(block, char_size);
+			print_dynmat(l->mat[i]);
 
 			free_matrix(block);
 			free_matrix(m);
 		}
 		free(char_in_line.coord);
+
 		++text->size;
 		text->line[j] = l;
 	}
@@ -473,5 +478,4 @@ int main() {
 	free_text(cutted);
 	printf("DONE\n");
 	return 0;
-
 }

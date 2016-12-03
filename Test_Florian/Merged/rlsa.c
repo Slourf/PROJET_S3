@@ -135,10 +135,8 @@ void supress_image(struct matrix *img, int x_l, int x_r, int y_t, int y_b) {
 
 
 struct lines* stock_lines_rlsa(struct matrix *img, struct tuple coord) {
-    printf("%d\n", coord.length);
 	struct lines *lines = init_lines(coord.length);
 	for (int i = 0; i < coord.length; ++i) {
-		printf("i = %d; x = %d; y = %d\n", i, coord.coord[i].y, coord.coord[i].x);
 		struct matrix *m = build_matrix(img->w, coord.coord[i].y - coord.coord[i].x + 1);
         copy(img, m, img->w - 1, 0, coord.coord[i].x);
 		m->w = img->w - 1;
@@ -150,16 +148,14 @@ struct lines* stock_lines_rlsa(struct matrix *img, struct tuple coord) {
 }
 
 struct lines* stock_columns_rlsa(struct matrix *img, struct tuple coord) {
-    printf("%d\n", coord.length);
     struct lines *columns = init_lines(coord.length);
     for (int i = 0; i < coord.length; ++i) {
-        printf("i = %d; x_r = %d; x_l = %d\n", i, coord.coord[i].y, coord.coord[i].x);
-        struct matrix *m = build_matrix(coord.coord[i].y - coord.coord[i].x + 1, img->h); 
-        copy(img, m, coord.coord[i].y - 1, coord.coord[i].x, img->h);
-        m->h = img->h - 1;
-        m->w = coord.coord[i].y - coord.coord[i].x;
+        struct matrix *m = build_matrix(coord.coord[i].y - coord.coord[i].x + 1, img->h);
+		printf("w = %zu; x_l = %d && x_r = %d\n", img->w, coord.coord[i].x, coord.coord[i].y);
+        copy(img, m, coord.coord[i].y, coord.coord[i].x, 0);
         columns->mat[i] = m;
-        print_dynmat(m);
+        //print_dynmat(m);
+		printf("w_m = %zu, h_m = %zu\n", m->w, m->h);
         printf("\n");
     }   
     return columns;
@@ -168,37 +164,41 @@ struct lines* stock_columns_rlsa(struct matrix *img, struct tuple coord) {
 
 struct block* block_rlsa_cut(struct matrix *matrix, struct block* list) {
 	struct block *block_list = malloc(sizeof (struct block));
+	printf("pass7\n");
+	printf("w = %zu && h = %zu\n", matrix->w, matrix->h);
+	print_dynmat(matrix);
 	struct tuple lines = line_cut(matrix);
-	printf("%d\n", lines.length);
+	printf("pass6\n");
 	struct lines *stored_lines = stock_lines_rlsa(matrix, lines);
-	printf("size = %zu\n",stored_lines->size);
+	printf("pass5\n");
 	for (size_t i = 1; i < stored_lines->size; ++i) {
 		struct matrix *curr = *(stored_lines->mat + i);
 		struct tuple columns = char_cut(curr);
 		print_dynmat(curr);
+		printf("ok\n");
 		struct lines *stored_columns = stock_columns_rlsa(curr, columns);
 		struct coord c_line = *(lines.coord + i);
 
 		(stored_lines + i)->Xori += c_line.x;
 		(stored_lines + i)->Yori += c_line.y;
 		printf("nb_line = %d; nb_col = %zu\n", lines.length, stored_columns->size);
-		if (lines.length == 1 && columns.length == 1) {
-			printf("x_l = %d; x_r = %d\ny_t = %d; y_b = %d\n",
-					columns.coord->x, columns.coord->y, lines.coord->x, lines.coord->y);
+		if (lines.length == 2 && columns.length == 1) {
+			printf("YOUHOUOUUUUUUUi\n");
+			printf("Xori = %d && Yori = %d\n", (stored_lines + i)->Xori,
+											   (stored_lines + i)->Xori);
 			//ajouter dans ma block_list
 			//en complétant tout les champs
 			list = append_block(list, block_list);
 			return list;
 		}
 		else {
-			for (size_t j = 0; j < stored_columns->size; ++j) {
+			for (size_t j = 1; j < stored_columns->size; ++j) {
 				struct coord c_column = *(columns.coord + j);
 				(stored_columns + i)->Xori += c_column.x;
 				(stored_columns + i)->Yori += c_column.y;
 				struct matrix *curr = *(stored_columns->mat + j);
 				list = block_rlsa_cut(curr, list);
 			}
-			printf("pass\n");
 		}
 	}
 	return list; 
