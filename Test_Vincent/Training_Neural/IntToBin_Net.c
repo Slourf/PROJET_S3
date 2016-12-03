@@ -268,8 +268,7 @@ void training ()
 	int nbHidden = 15 * 15;
 	//int nbTests=20000000;
 	float *input = calloc(nbInput, sizeof(float));
-	float *outputs = calloc(nbOutput, sizeof(float));
-
+	int nbTests = 2000;
 	float *outexpected = calloc(nbOutput, sizeof(float));
 	float *output = calloc(nbOutput, sizeof(float));
 	float *hidden = calloc(nbHidden, sizeof(float));
@@ -281,57 +280,79 @@ void training ()
 	float *productDelta = calloc(nbHidden, sizeof(float));
 	float *deltaHidden = calloc(nbOutput* nbHidden, sizeof(float));
 	char * characters = calloc(52, sizeof(char));
+	FILE *f1,*f2;
+	f1=fopen("weightIH.txt","r");
+	f2=fopen("weightHO.txt","r");
+	if(f1 && f2)
+	{
+		fclose(f1);
+		fclose(f2);
+		readFile("weightIH.txt", wIH, nbHidden * (nbInput + 1));
+		readFile("weightHO.txt", wHO, nbOutput * (nbHidden + 1));
+	}
 
-	int iter_char = 0;
 	fileName(characters);
-	char * path = calloc(10, sizeof(char));
+	char *path = calloc(15, sizeof(char));
 	strcat(path, "CharFile/");
 	struct dirent *charFileRead;
-	for (int i = 0 ; i < 52 ; ++i){
-		path[9] = characters[i];
-		DIR * mainFile = opendir(path);
-		while(( charFileRead = readdir(mainFile))){
-			if (charFileRead->d_name[0] != '.'){
-				char* buffer = calloc(20, sizeof(char));
-				strcat(buffer, path);
-				strcat(buffer, "/");
-				strcat(buffer, charFileRead->d_name);
-				SDL_Surface * img = load_image(buffer);
-				struct text *txt = cut(img);
-				int index_input = 0;
-				for (int y = 0; y < 15; ++y)
-				{
-					for (int x = 0; x < 15; ++x)
+	DIR* mainFile;
+	for (int t = 0 ; t < nbTests ; ++t){
+		for (int i = 0 ; i < 52 ; ++i){
+			path[9] = characters[i];
+			mainFile = opendir(path);
+			printf("Exploring : %s\n", path);
+			while(( charFileRead = readdir(mainFile))){
+				if (charFileRead->d_name[0] != '.'){
+					char* buffer = calloc(30, sizeof(char));
+					strcat(buffer, path);
+					strcat(buffer, "/");
+					strcat(buffer, charFileRead->d_name);
+					SDL_Surface * img = load_image(buffer);
+//					printf("%s\n",buffer);
+					struct text *txt = cut(img);
+					SDL_FreeSurface(img);
+					int index_input = 0;
+					for (int y = 0; y < 15; ++y)
 					{
-						input[index_input] = txt->line[0]->mat[0]->data[x][y];
-						++index_input;
+						for (int x = 0; x < 15; ++x)
+						{
+							input[index_input] = txt->line[0]->mat[0]->data[x][y];
+							++index_input;
+						}
 					}
+					//	printimg(input, 15, 15);
+					index_input = 0;
+					toBin(outexpected, characters[i]);
+					product(input, wIH, hidden, nbHidden, nbInput + 1);
+					product(hidden, wHO, output, nbOutput, nbHidden + 1);
+					DeltaOutput(outputDelta, output, outexpected, nbOutput);
+					deltaproduct(productDelta, wHO, outputDelta,
+					nbOutput, nbInput+1);
+					DeltaHidden(deltaHidden, productDelta, hidden, nbInput);
+					newWeight(wHO , hidden, outputDelta, 0.3, nbOutput, nbHidden+1);
+					newWeight(wIH , input, deltaHidden, 0.3, nbHidden, nbHidden+1);
+					free(buffer);
 				}
-				printimg(input, 15, 15);
-				index_input = 0;
-				toBin(outexpected, characters[i]);
-
-				product(input, wIH, hidden, nbHidden, nbInput + 1);
-				product(hidden, wHO, output, nbOutput, nbHidden + 1);
-				DeltaOutput(outputDelta, output, outexpected, nbOutput);
-				deltaproduct(productDelta, wHO, outputDelta, nbOutput, nbInput+1);
-				DeltaHidden(deltaHidden, productDelta, hidden, nbInput);
-				newWeight(wHO , hidden, outputDelta, 0.3, nbOutput, nbHidden+1);
-				newWeight(wIH , input, deltaHidden, 0.3, nbHidden, nbHidden+1);
-				free(buffer);
 			}
-
-
+			closedir(mainFile);
 		}
-		closedir(mainFile);
-
+		writeFile("weightIH.txt", wIH, nbHidden * (nbInput + 1));
+		writeFile("weightHO.txt", wHO, nbOutput * (nbHidden + 1));
 	}
-	++iter_char;
-	//appel fonction image->matrice
-
 
 	writeFile("weightIH.txt", wIH, nbHidden * (nbInput + 1));
 	writeFile("weightHO.txt", wHO, nbOutput * (nbHidden + 1));
+	free(input);
+	free(outexpected);
+	free(output);
+	free(hidden);
+	free(wIH);
+	free(wHO);
+	free(outputDelta);
+	free(productDelta);
+	free(deltaHidden);
+	free(characters);
+	free(path);
 }
 
 char *single_forward (struct text *img)
@@ -357,17 +378,17 @@ char *single_forward (struct text *img)
 	readFile("weightHO.txt", wHO, nbOutput * (nbHidden + 1));
 
 	int nbChar = 0;
-	for (int i = 0; i < img->size; ++i)
+	for (size_t i = 0; i < img->size; ++i)
 	{
-		for (int j = 0; j < img->line[i]->size; ++j)
+		for (size_t j = 0; j < img->line[i]->size; ++j)
 			++nbChar;
 	}
 
-
-	char *carac = calloc(nbChar, sizeof(char));
-	for (int i = 0; i < img->size; ++i)
+	printf("Number of characters%i",nbChar);
+	char *carac = calloc(nbChar+1, sizeof(char));
+	for (size_t i = 0; i < img->size; ++i)
 	{
-		for (int j = 0; j < img->line[i]->size; ++j)
+		for (size_t j = 0; j < img->line[i]->size; ++j)
 		{
 
 			int index_input = 0;
@@ -395,6 +416,12 @@ char *single_forward (struct text *img)
 			++index_result;
 		}
 	}
+	free(input);
+	free(output);
+	free(hidden);
+	free(wIH);
+	free(wHO);
+	free(result);
 	return carac;
 
 }
@@ -405,7 +432,9 @@ int main()
 	training();
 	SDL_Surface * img = load_image("CharFile/E/12.bmp");
 	struct text *txt = cut(img);
-	printf("%s", single_forward(txt));
+	char * string = single_forward(txt);
+	printf("%s\n", string);
+	free(string);
 	/*
 		int nbInput = 3;
 		int nbOutput = 3;
