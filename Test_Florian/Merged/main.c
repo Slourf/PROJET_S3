@@ -146,7 +146,7 @@ void img2mat(SDL_Surface *img, struct matrix *mat) {
 
 void print_dynmat(struct matrix *mat) {
     for (size_t j = 0; j < mat->h; ++j) {
-        for (size_t i = 0; i < mat->w; ++i)
+        for (size_t i = 0; i < mat->w; ++i) 
             printf("%ld", mat->data[i][j]);
         printf("\n");
     }
@@ -273,7 +273,6 @@ struct tuple line_cut(struct matrix *mat) {
 
 	struct coord *list = NULL;
 	struct tuple t;
-
 	for (size_t y = 0; y < mat->h; ++y) {
 		size_t x = 0;
 		c = 0;
@@ -351,7 +350,7 @@ struct tuple char_cut(struct matrix *mat)
 		   			++nbchar;
 		   			list = realloc(list, nbchar * sizeof(struct coord));
 		   			list[nbchar - 1].x = x_top+blank_count-1;
-		   			list[nbchar - 1].y = x;
+		   			list[nbchar - 1].y = x - 1;
 		   			blank_count = 0;
 				}
 				x_top = x;
@@ -362,7 +361,7 @@ struct tuple char_cut(struct matrix *mat)
 	       		aver_size_char = (aver_size_char * (nbchar - 1) + x - x_top) / nbchar;
 	       		list = realloc(list, nbchar * sizeof(struct coord));
                	list[nbchar - 1].x = x_top;
-               	list[nbchar - 1].y = x - 1;
+               	list[nbchar - 1].y = x;
             }
         	b = 1;
     	}
