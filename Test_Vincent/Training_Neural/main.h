@@ -64,8 +64,14 @@ SDL_Surface* display_image(SDL_Surface *img);
 SDL_Surface to_black_white(SDL_Surface *img);
 
 struct matrix* build_matrix(size_t x, size_t y);
+struct line* build_line(size_t length);
+struct text* build_text(size_t length);
+
 void print_dynmat(struct matrix *mat);
 void free_matrix(struct matrix *mat);
+void free_line(struct line *l);
+void free_text(struct text *text);
+
 struct tTuple block_cut (struct matrix *mat);
 void copy(struct matrix *old_mat, struct matrix *new_mat, int x_l, int x_u, int y_u);
 struct tuple line_cut(struct matrix *mat);
