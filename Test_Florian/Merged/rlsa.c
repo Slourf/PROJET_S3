@@ -184,8 +184,8 @@ struct block* block_rlsa_cut(struct matrix *matrix, struct block* list) {
 		printf("nb_line = %d; nb_col = %zu\n", lines.length, stored_columns->size);
 		if (lines.length == 2 && columns.length == 1) {
 			printf("YOUHOUOUUUUUUUi\n");
-			printf("Xori = %d && Yori = %d\n", (stored_lines + i)->Xori,
-											   (stored_lines + i)->Xori);
+//			printf("Xori = %d && Yori = %d\n", (stored_lines + i)->Xori,
+//											   (stored_lines + i)->Xori);
 			//ajouter dans ma block_list
 			//en complétant tout les champs
 			list = append_block(list, block_list);
@@ -196,8 +196,8 @@ struct block* block_rlsa_cut(struct matrix *matrix, struct block* list) {
 				struct coord c_column = *(columns.coord + j);
 				(stored_columns + i)->Xori += c_column.x;
 				(stored_columns + i)->Yori += c_column.y;
-				struct matrix *curr = *(stored_columns->mat + j);
-				list = block_rlsa_cut(curr, list);
+				struct matrix *curr1 = *(stored_columns->mat + j);
+				list = block_rlsa_cut(curr1, list);
 			}
 		}
 	}
