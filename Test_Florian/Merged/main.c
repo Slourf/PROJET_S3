@@ -469,12 +469,13 @@ int main() {
 	init_sdl();
 
 	SDL_Surface *img = load_image(path);
-	struct text *cutted = cut(img);
+//	struct text *cutted = cut(img);
 	struct matrix *mat_rlsa = rlsa(img);
+	printf("HELO");
 	free_matrix(mat_rlsa);
 	SDL_FreeSurface(img);
 	free(path);
-	free_text(cutted);
+//	free_text(cutted);
 	printf("FINISHED\n");
 	return 0;
 
