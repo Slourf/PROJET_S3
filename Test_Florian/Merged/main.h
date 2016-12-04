@@ -30,8 +30,7 @@ struct text {
 };
 
 struct block {    
-		size_t Xmin, Ymin, delX, delY;    
-        int wb_trans;    
+		size_t Xori, Yori, w, h;    
         struct block *next;    
 };    
     
@@ -84,7 +83,7 @@ void rlsa_hor(struct matrix *ori, struct matrix *mat, int c);
 void rlsa_merge(struct matrix *mat_img, struct matrix *mat_vec, struct matrix *mat_hor); 
 struct block* append_block(struct block *block, struct block *new);
 struct lines* stock_lines_rlsa(struct matrix *img, struct tuple coord) ;
-struct block* block_rlsa_cut(struct matrix *matrix, struct block* list);
+struct block* block_rlsa_cut(struct matrix *matrix, struct block* list, int x, int y);
 void display(struct matrix *mat); 
     
 struct matrix* rlsa(SDL_Surface *img); 
