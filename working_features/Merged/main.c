@@ -368,6 +368,7 @@ struct tuple char_cut(struct matrix *mat)
 		   			list[nbchar - 1].x = x_top + blank_count - 1;
 		   			list[nbchar - 1].y = x;
 		   			blank_count = 0;
+					not_first = 1;
 				}
 				x_top = x;
             	w = 0;
@@ -378,7 +379,6 @@ struct tuple char_cut(struct matrix *mat)
 	       		list = realloc(list, nbchar * sizeof(struct coord));
                	list[nbchar - 1].x = x_top;
                	list[nbchar - 1].y = x - 1;
-				not_first = 1;
             }
         	b = 1;
     	}
@@ -425,7 +425,6 @@ void stock_char(struct text *text, struct line *line, struct tuple nb_line, int 
 							t.y_l - t.y_u + 1);
 			copy(m, block, t.x_l - 1, t.x_u, t.y_u);
 			l->mat[i] = resize_char(block, char_size);
-
 			free_matrix(block);
 			free_matrix(m);
 		}
