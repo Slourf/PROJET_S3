@@ -37,9 +37,9 @@ void display_text_gtk(GtkButton *button, gpointer data) {
 			file = fopen("IRIS_text.txt", "w");
 			SDL_Surface *img = load_image((char*)path);
 			struct text *mat_img = cut(img);
-
+			
 			char *text = single_forward(mat_img);
-
+			printf("%s\n", text);
 			gtk_text_buffer_get_iter_at_mark(d->buffer, &(d->iter), d->mark);
 			gtk_text_view_set_wrap_mode (GTK_TEXT_VIEW (d->box), GTK_WRAP_WORD);
 			gtk_text_buffer_insert(d->buffer, &(d->iter), text, -1);
@@ -47,7 +47,7 @@ void display_text_gtk(GtkButton *button, gpointer data) {
 				fputs(text, file);
 				fclose(file);
 			}
-			gtk_text_buffer_insert(d->buffer, &(d->iter),"Finished\n", -1);
+			gtk_text_buffer_insert(d->buffer, &(d->iter),"***\nFinished\n***\nYour text has been saved in the file 'IRIS_text.txt'\n***\n", -1);
 		}
 		else {
             gtk_text_buffer_get_iter_at_mark(d->buffer, &(d->iter), d->mark);

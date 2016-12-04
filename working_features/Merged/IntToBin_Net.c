@@ -55,11 +55,15 @@ void readFile(char *path, float *b, size_t len)
 	FILE* file = fopen(path, "r");
 	if (file != NULL)
 	{
+		int f = 0;
 		for (size_t i = 0; i < len; i++)
 		{
-			fscanf(file, "%f", (b+i));
+			f = fscanf(file, "%f", (b+i));
 		}
-		fclose(file);
+		if (f)
+			fclose(file);
+		else
+			fclose(file);
 	}
 	else
 		errx(1, "Invalid path");
@@ -448,7 +452,7 @@ char *single_forward (struct text *img)
 
 }
 
-
+/*
 int main()
 {
 	//training();
@@ -458,7 +462,7 @@ int main()
 	printf("%s\n", string);
 	SDL_FreeSurface(img);
 	free(string);
-
+*/
 	/*
 		int nbInput = 3;
 		int nbOutput = 3;
@@ -543,7 +547,7 @@ free(productDelta);
 free(deltaHidden);
 return 0;
 */
-}
+//}
 
 /*		printf("%i = ",(int)input[0]);
 		for (int j = 0 ; j < 4; ++j)
