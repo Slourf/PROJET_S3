@@ -432,6 +432,7 @@ struct text *cut(SDL_Surface *img) {
 	//print_dynmat(mat_img, img->w, img->h);
 	printf("\n");
 	display_image(img);
+	rlsa(img, mat_img);
 	/*First cutting*/
 	struct tTuple t = block_cut(mat_img);
 	struct matrix *block = build_matrix(t.x_l - t.x_u + 1, t.y_l - t.y_u + 1);
@@ -470,9 +471,6 @@ int main() {
 
 	SDL_Surface *img = load_image(path);
 	struct text *cutted = cut(img);
-//	struct matrix *mat_rlsa = rlsa(img);
-	printf("HELO");
-//	free_matrix(mat_rlsa);
 	SDL_FreeSurface(img);
 	free(path);
 	free_text(cutted);

@@ -142,7 +142,6 @@ struct lines* stock_lines_rlsa(struct matrix *img, struct tuple coord) {
 		m->w = img->w - 1;
 		m->h = coord.coord[i].y - coord.coord[i].x;
         lines->mat[i] = m;
-		printf("\n");
 	}
 	return lines;
 }
@@ -153,7 +152,6 @@ struct lines* stock_columns_rlsa(struct matrix *img, struct tuple coord) {
         struct matrix *m = build_matrix(coord.coord[i].y - coord.coord[i].x + 1, img->h);
         copy(img, m, coord.coord[i].y, coord.coord[i].x, 0);
         columns->mat[i] = m;
-        printf("\n");
     }
     return columns;
 }
@@ -167,11 +165,8 @@ struct block* block_rlsa_cut(struct matrix *matrix, struct block* list, int x, i
 		struct matrix *curr = *(stored_lines->mat + i);
 		struct tuple columns = char_cut(curr);
 		struct lines *stored_columns = stock_columns_rlsa(curr, columns);
-
 		struct coord c_line = *(lines.coord + i);
-		printf("lines = %d, columns = %zu\n", lines.length, stored_columns->size);
 		if ((lines.length == 1 || lines.length == 2) && columns.length == 1) {
-			printf("x = %d, y = %d\n", x, y);
 			block_list->Xori = x;
 			block_list->Yori = y;
 			block_list->w = matrix->w;
@@ -180,10 +175,11 @@ struct block* block_rlsa_cut(struct matrix *matrix, struct block* list, int x, i
 			return list;
 		}
 		else {
-			for (size_t j = 1; j < stored_columns->size; ++j) {
+			for (size_t j = 0; j < stored_columns->size; ++j) {
 				struct coord c_column = *(columns.coord + j);
 				struct matrix *curr1 = *(stored_columns->mat + j);
-				list = block_rlsa_cut(curr1, list, x + c_column.x, y + c_line.y);
+				//printf("x += %d; y += %d\n", c_column.x, c_line.x);
+				list = block_rlsa_cut(curr1, list, x + c_column.x, y + c_line.x);
 			}
 		}
 	}
@@ -193,28 +189,31 @@ struct block* block_rlsa_cut(struct matrix *matrix, struct block* list, int x, i
 //Delete image
 ////////////////////////////////////////////
 
-size_t average_heigth(struct block *list) {
+size_t average_heigth(struct block *list, size_t min) {
 	size_t aver = 0;
 	int i = 0;
 
 	for (; list; list = list->next) {
-		++i;
-		aver = (aver * i + list->h) / (i + 1);
+		if (list->h > min) {
+			++i;
+			aver = (aver * i + list->h) / (i + 1);
+		}
 	}
 	return aver;
 }
 
 void remove_image(struct matrix *img, struct block *b) {
-	for (size_t i = b->Xori; i < i + b->w; ++i) {
-		for (size_t j = b->Yori; j < j + b->h; ++j) {
-			img->data[i][j] = 0;
+	for (size_t j = b->Xori; j < b->Xori + b->w; ++j) {
+		for (size_t i = b->Yori; i < b->Yori + b->h; ++i) {
+			img->data[j][i] = 0;
 		}
 	}
 }
 
 void suppress(struct block *list, struct matrix *img, size_t aver) {
+	printf("aver = %zu\n", aver);
 	for (; list; list = list->next) {
-		if (list->h  > aver * 4) {
+		if (list->h  > aver * 15) {
 			remove_image(img, list);
 		}
 	}
@@ -256,7 +255,7 @@ void display(struct matrix *mat) {
 /*Final function which will be called*/
 ////////////////////////////////////////
 
-struct matrix *rlsa(SDL_Surface *img) {
+void rlsa(SDL_Surface *img, struct matrix *mat) {
 	
 	/*Generating the matrix*/
 	*img = to_black_white(img);
@@ -279,15 +278,13 @@ struct matrix *rlsa(SDL_Surface *img) {
 	struct matrix *m = build_matrix(img->w, img->h);
 	m = mat_img;
 	struct block *list = block_rlsa_cut(m, NULL, 0, 0);
-	size_t averH = average_heigth(list);
+	size_t averH = average_heigth(list, m->h / 155);
+	display(mat);	
+	suppress(list, mat,  averH);	
 	
-	suppress(list, m,  averH);	
-	
-	printf("HELLOi\n");
+	display(mat);
 	free_list(list);
 	free_matrix(mat_vec);
 	free_matrix(mat_hor);
-	printf("COUOCUi\n");
-	return m;
 }
 
