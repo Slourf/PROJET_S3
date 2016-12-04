@@ -391,9 +391,9 @@ void stock_char(struct text *text, struct line *line, struct tuple nb_line, int 
 		struct line *l = build_line(char_in_line.length);
 		for (int i = 0; i < char_in_line.length; ++i) {
 			struct matrix *m = 	build_matrix(char_in_line.coord[i].y - 	
-						char_in_line.coord[i].x + 2,
+						char_in_line.coord[i].x + 1,
 						nb_line.coord[j].y - 
-						nb_line.coord[j].x + 2);
+						nb_line.coord[j].x + 1);
 			copy(line->mat[j], m, char_in_line.coord[i].y ,char_in_line.coord[i].x, 0);
 			struct tTuple t = block_cut(m);
 			struct matrix *block = build_matrix(t.x_l - t.x_u + 1, 
@@ -469,13 +469,13 @@ int main() {
 	init_sdl();
 
 	SDL_Surface *img = load_image(path);
-//	struct text *cutted = cut(img);
-	struct matrix *mat_rlsa = rlsa(img);
+	struct text *cutted = cut(img);
+//	struct matrix *mat_rlsa = rlsa(img);
 	printf("HELO");
-	free_matrix(mat_rlsa);
+//	free_matrix(mat_rlsa);
 	SDL_FreeSurface(img);
 	free(path);
-//	free_text(cutted);
+	free_text(cutted);
 	printf("FINISHED\n");
 	return 0;
 
