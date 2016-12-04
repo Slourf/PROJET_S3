@@ -17,6 +17,7 @@
 void writeFile(char* path, float *a, size_t len)
 {
 	FILE* file = fopen(path, "w");
+	float* tmp = a;
 	if (file != NULL)
 	{
 		for (size_t i = 0; i < len; i++)
@@ -24,6 +25,7 @@ void writeFile(char* path, float *a, size_t len)
 			fprintf(file, "%f\n", *a);
 			a++;
 		}
+		a = tmp;
 		fclose(file);
 	}
 	else
@@ -266,9 +268,8 @@ void training ()
 	int nbInput = 15 * 15;
 	int nbOutput = 7;
 	int nbHidden = 15 * 15;
-	//int nbTests=20000000;
 	float *input = calloc(nbInput, sizeof(float));
-	int nbTests = 2000;
+	int nbTests = 20000;
 	float *outexpected = calloc(nbOutput, sizeof(float));
 	float *output = calloc(nbOutput, sizeof(float));
 	float *hidden = calloc(nbHidden, sizeof(float));
@@ -297,10 +298,10 @@ void training ()
 	struct dirent *charFileRead;
 	DIR* mainFile;
 	for (int t = 0 ; t < nbTests ; ++t){
+		printf("Tour n°%i\n",t);
 		for (int i = 0 ; i < 52 ; ++i){
 			path[9] = characters[i];
 			mainFile = opendir(path);
-			printf("Exploring : %s\n", path);
 			while(( charFileRead = readdir(mainFile))){
 				if (charFileRead->d_name[0] != '.'){
 					char* buffer = calloc(30, sizeof(char));
@@ -332,6 +333,7 @@ void training ()
 					newWeight(wHO , hidden, outputDelta, 0.3, nbOutput, nbHidden+1);
 					newWeight(wIH , input, deltaHidden, 0.3, nbHidden, nbHidden+1);
 					free(buffer);
+					free_text(txt);
 				}
 			}
 			closedir(mainFile);
@@ -339,7 +341,6 @@ void training ()
 		writeFile("weightIH.txt", wIH, nbHidden * (nbInput + 1));
 		writeFile("weightHO.txt", wHO, nbOutput * (nbHidden + 1));
 	}
-
 	writeFile("weightIH.txt", wIH, nbHidden * (nbInput + 1));
 	writeFile("weightHO.txt", wHO, nbOutput * (nbHidden + 1));
 	free(input);
@@ -384,7 +385,7 @@ char *single_forward (struct text *img)
 			++nbChar;
 	}
 
-	printf("Number of characters%i",nbChar);
+	printf("Number of characters %i\n",nbChar);
 	char *carac = calloc(nbChar+1, sizeof(char));
 	for (size_t i = 0; i < img->size; ++i)
 	{
@@ -434,6 +435,7 @@ int main()
 	struct text *txt = cut(img);
 	char * string = single_forward(txt);
 	printf("%s\n", string);
+	SDL_FreeSurface(img);
 	free(string);
 	/*
 		int nbInput = 3;

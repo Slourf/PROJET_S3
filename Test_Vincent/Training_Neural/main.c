@@ -420,6 +420,7 @@ void stock_char(struct text *text, struct line *line, struct tuple nb_line, int 
 			free_matrix(m);
 		}
 		free(char_in_line.coord);
+
 		++text->size;
 		text->line[j] = l;
 	}
@@ -459,19 +460,14 @@ int main() {
   	printf("Please enter the path to your image: ");
   	if(scanf("%256s", path) != 1)
         return -1; 
-	init_sdl();
 	
-	
-
 	SDL_Surface *img = load_image(path);
 	
-	struct text *cutted = cut(img);
+//	struct text *cutted = cut(img);
 //	struct matrix *mat_rlsa = rlsa(img, 10);
 //	free_matrix(mat_rlsa);
 	SDL_FreeSurface(img);
 	free(path);
-	free_text(cutted);
-	printf("DONE\n");
+//	free_text(cutted);
 	return 0;
-
 }*/
