@@ -255,7 +255,7 @@ void display(struct matrix *mat) {
 /*Final function which will be called*/
 ////////////////////////////////////////
 
-struct matrix *rlsa(SDL_Surface *img) {
+void rlsa(SDL_Surface *img, struct matrix *mat) {
 	
 	/*Generating the matrix*/
 	*img = to_black_white(img);
@@ -279,13 +279,12 @@ struct matrix *rlsa(SDL_Surface *img) {
 	m = mat_img;
 	struct block *list = block_rlsa_cut(m, NULL, 0, 0);
 	size_t averH = average_heigth(list, m->h / 155);
-	display(m);	
-	suppress(list, m,  averH);	
+	display(mat);	
+	suppress(list, mat,  averH);	
 	
-	display(m);
+	display(mat);
 	free_list(list);
 	free_matrix(mat_vec);
 	free_matrix(mat_hor);
-	return m;
 }
 

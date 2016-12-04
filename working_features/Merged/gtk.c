@@ -3,6 +3,7 @@
 # include <SDL/SDL.h>
 # include <SDL/SDL_image.h>
 # include "main.h"
+# include "IntToBin_Net.h"
 #define UTF8(string) g_locale_to_utf8(string, -1, NULL, NULL, NULL)
 
 
@@ -32,15 +33,20 @@ void display_text_gtk(GtkButton *button, gpointer data) {
 		path = gtk_entry_get_text(GTK_ENTRY(d->entry));
 		
 		if (*path != 0) {
-			
-	//		SDL_Surface *img = load_image((char*)path);
-	//		struct text *mat_img = cut(img);
+			FILE *file = NULL;
+			file = fopen("IRIS_text.txt", "w");
+			SDL_Surface *img = load_image((char*)path);
+			struct text *mat_img = cut(img);
 
-	//		char *text = single_forward(mat_img);
+			char *text = single_forward(mat_img);
 
 			gtk_text_buffer_get_iter_at_mark(d->buffer, &(d->iter), d->mark);
 			gtk_text_view_set_wrap_mode (GTK_TEXT_VIEW (d->box), GTK_WRAP_WORD);
-	//		gtk_text_buffer_insert(d->buffer, &(d->iter), text, -1);
+			gtk_text_buffer_insert(d->buffer, &(d->iter), text, -1);
+			if (file) {
+				fputs(text, file);
+				fclose(file);
+			}
 			gtk_text_buffer_insert(d->buffer, &(d->iter),"Finished\n", -1);
 		}
 		else {
@@ -79,7 +85,7 @@ void load_image_gtk(GtkButton *button, gpointer data) {
 		}
 	}
 }
-/*
+
 int main(int argc, char **argv)
 {
 	init_sdl();
@@ -158,4 +164,4 @@ int main(int argc, char **argv)
 
     return EXIT_SUCCESS;
 }
-*/
+

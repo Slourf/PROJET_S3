@@ -433,6 +433,7 @@ struct text *cut(SDL_Surface *img) {
   	struct matrix *mat_img = build_matrix(img->w, img->h);
   	*img = to_black_white(img);
   	img2mat(img, mat_img);
+	rlsa(img, mat_img);
 	//First cutting*/
 	struct tTuple t = block_cut(mat_img);
 	struct matrix *block = build_matrix(t.x_l - t.x_u + 1, t.y_l - t.y_u + 1);
@@ -454,7 +455,7 @@ struct text *cut(SDL_Surface *img) {
 	return text;
 }
 
-
+/*
 int main() {
   	char *path = malloc(256);
   	printf("Please enter the path to your image: ");
@@ -463,11 +464,9 @@ int main() {
 	
 	SDL_Surface *img = load_image(path);
 	
-//	struct text *cutted = cut(img);
-//	struct matrix *mat_rlsa = rlsa(img, 10);
-//	free_matrix(mat_rlsa);
+	struct text *cutted = cut(img);
 	SDL_FreeSurface(img);
 	free(path);
-//	free_text(cutted);
+	free_text(cutted);
 	return 0;
-}
+}*/

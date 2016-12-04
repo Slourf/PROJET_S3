@@ -86,7 +86,7 @@ struct lines* stock_lines_rlsa(struct matrix *img, struct tuple coord) ;
 struct block* block_rlsa_cut(struct matrix *matrix, struct block* list, int x, int y);
 void display(struct matrix *mat); 
     
-struct matrix* rlsa(SDL_Surface *img); 
+void rlsa(SDL_Surface *img, struct matrix *mat); 
 
 ///////////////////////////////////////////////
 ///////////////////Resize//////////////////////
