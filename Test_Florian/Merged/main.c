@@ -332,6 +332,7 @@ struct tuple char_cut(struct matrix *mat)
     int nbchar = 0;
     int blank_count = 0;
     int aver_size_char = 0;
+	int not_first = 0;
     struct coord *list = NULL;
     struct tuple t;
     for (size_t x = 0; x < mat->w; ++x) {
@@ -352,6 +353,7 @@ struct tuple char_cut(struct matrix *mat)
 		   			list[nbchar - 1].x = x_top+blank_count-1;
 		   			list[nbchar - 1].y = x - 1;
 		   			blank_count = 0;
+					not_first = 1;
 				}
 				x_top = x;
             	w = 0;
@@ -367,6 +369,14 @@ struct tuple char_cut(struct matrix *mat)
     	}
     	else {
 			++blank_count;
+            if (blank_count > aver_size_char + 1 && not_first) { 
+                ++nbchar;
+                list = realloc(list, nbchar * sizeof(struct coord));
+                list[nbchar - 1].x = x_top + blank_count - 1;
+                list[nbchar - 1].y = x;
+                blank_count = 0;
+            }
+
 			if (b == 1) {
 				++nbchar;
 				aver_size_char = (aver_size_char * (nbchar - 1) + x - x_top) / nbchar;
