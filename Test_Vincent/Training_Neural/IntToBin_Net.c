@@ -220,9 +220,9 @@ void newWeight(float *W, float* M, float* Delta, float lr, int r, int l)
 char fromBin (int *array, int l)
 {
 	int result = 0;
-	for (int i = 0; i < l; ++i)
+	for (int i = l; i > 0; --i)
 	{
-		result = 2 * result + array[i];
+		result = 2 * result + array[i-1];
 	}
 	return (char) result;
 }
@@ -430,13 +430,14 @@ char *single_forward (struct text *img)
 
 int main()
 {
-	training();
-	SDL_Surface * img = load_image("CharFile/E/12.bmp");
+	//training();
+	SDL_Surface * img = load_image("CharFile/A/12.bmp");
 	struct text *txt = cut(img);
 	char * string = single_forward(txt);
 	printf("%s\n", string);
 	SDL_FreeSurface(img);
 	free(string);
+
 	/*
 		int nbInput = 3;
 		int nbOutput = 3;
