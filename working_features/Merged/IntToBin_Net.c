@@ -117,12 +117,7 @@ void product(float *in, float *w, float *o, int r, int l)
 
 
 /*=================Backward propagation=================*/
-/*
- *dst est vecteur et non matrice
- *Actual est vecteur et non matrice
- *Output est vecteur et non matrice
- *This function is done
- */
+
 /*This function compute the delta value for the output layer*/
 
 void DeltaOutput(float *dst,float *Actual, float *Expect, int l)
@@ -134,21 +129,6 @@ void DeltaOutput(float *dst,float *Actual, float *Expect, int l)
 	}
 }
 
-/*
-	void DeltaOutput(float *dst,float *Actual, float *Expect, int r, int l)
-	{
-	for (int j = 0 ; j < l ; ++j)
-	{
-	int lineoffset = j * r;
-	for (int i = 0 ; i < r ; ++i)
-	{
-	dst[lineoffset + i] = (Actual[lineoffset+i] -
-	Expect[lineoffset+i])*Actual[lineoffset+i] *
-	(1 - Actual[lineoffset+i]);
-	}
-	}
-	}
- */
 
 /*This fuction compute the product of the delta of output layer and weight
   between hidden layer and output layer*/
@@ -170,19 +150,6 @@ void deltaproduct(float *dst, float *W, float* delta, int c, int l)
 }
 
 
-/*
-	void deltaproduct(float *dst, float *W, float* delta, int c, int l)
-	{
-	for (int j = 0 ; j < l ; ++j)
-	{
-	int lineoffset = (j)*c;
-	for (int i = 0 ; i < c ; ++i)
-	{
-	dst[lineoffset+i] = W[lineoffset+i+c] * delta[i%l];
-	}
-	}
-	}
- */
 
 /*This function compute the delta value for the hidden layer*/
 
@@ -194,31 +161,6 @@ void DeltaHidden(float *dst, float *delta, float *hidden, int l)
 	}
 }
 
-/*
-	This function compute the delta value for the hidden layer
- */
-/*
-	void DeltaHidden(float *dst, float *delta, float *hidden, int c, int l)
-	{
-	float sum = 0;
-	for (int j = 0 ; j < l ; ++j)
-	{
-	for (int i = 0 ; i < c ; ++i)
-	{
-	sum+=delta[j*c+i];
-	}
-	}
-	for (int j = 0 ; j < l ; ++j)
-	{
-	int lineoffset = j*c;
-	for (int i = 0 ; i < c ; ++i)
-	{
-	dst[lineoffset+i] = hidden[lineoffset+i] *
-	(1 - hidden[lineoffset+i] ) * sum;
-	}
-	}
-	}
- */
 
 /*This function update the weights after observing the error rate between
   actuel result and expected result*/
@@ -229,12 +171,10 @@ void newWeight(float *W, float* M, float* Delta, float lr, int r, int l)
 		W[j] = W[j] - lr * Delta[j];
 		for (int i = 1 ; i < l ; ++i)
 		{
-			//	printf("%f = %f - %f * %f * %f\n",W[r*i+j],W[r*i+j], lr, Delta[j],M[i-1]);
 			W[r*i + j] =W[r*i+j]- ( lr * Delta[j] * M[i-1]);
 
 		}
 	}
-	//		printf("\n");
 }
 
 /*This function convert a binary to a decimal*/
@@ -284,6 +224,7 @@ void printimg(float* M, int c, int l){
 
 /*==========End Backward Propagation========*/
 
+/*
 void training ()
 {
 	int nbInput = 15 * 15;
@@ -376,6 +317,7 @@ void training ()
 	free(characters);
 	free(path);
 }
+*/
 
 char *single_forward (struct text *img)
 {
@@ -450,225 +392,3 @@ char *single_forward (struct text *img)
 	return carac;
 
 }
-
-/*
-int main()
-{
-	//training();
-	SDL_Surface * img = load_image("text.bmp");
-	struct text *txt = cut(img);
-	char * string = single_forward(txt);
-	printf("%s\n", string);
-	SDL_FreeSurface(img);
-	free(string);
-*/
-	/*
-		int nbInput = 3;
-		int nbOutput = 3;
-		int nbHidden = 3;
-		int nbTests=20000000;
-		float *input = calloc(nbInput , sizeof(float));
-		float inputs[] = {0,0,0,
-		0,0,1,
-		0,1,0,
-		0,1,1};
-		float outputs[] = {0,0,1,
-		0,1,0,
-		0,1,1,
-		0,0,0};
-		float *outexpected = calloc(nbOutput , sizeof(float));
-		float *output = calloc(nbOutput , sizeof(float));
-		float *hidden = calloc(nbHidden , sizeof(float));
-		float *wIH = calloc(nbHidden * (nbInput+1) , sizeof(float));
-		float *wHO = calloc(nbOutput * (nbHidden+1) , sizeof(float));
-		initWeight(wIH, nbHidden, nbInput+1);
-		initWeight(wHO, nbOutput, nbHidden+1);
-		float *outputDelta = calloc(nbOutput , sizeof(float));
-		float *productDelta = calloc(nbHidden , sizeof(float));
-		float *deltaHidden = calloc(nbOutput* nbHidden, sizeof(float));
-
-
-		for (int i = 0 ; i < 4 ; ++i)
-		{
-		input[0] = inputs[i%3];
-		input[1] = inputs[i*3+1];
-		input[2] = inputs[i*3+2];
-		product(input, wIH, hidden, nbInput, nbHidden+1);
-		product(hidden, wHO, output, nbOutput, nbHidden+1);
-		printf("%f - %f - %f  = ",input[0], input[1], input[2]);
-	//	printf("%f ", (output[j]));
-	printf("%f - %f - %f", output[0] >0.5?1.0:0.0, output[1]>0.5?1.0:0.0,
-	output[2]>0.5?1.0:0.0);
-	printf("\n");
-
-	}
-	printf("\n\n\n");
-
-	//	=======================Training loop======================
-	for (int t = 0 ; t < nbTests ; ++t)
-	{
-	input[0] = inputs[(3*t%4)%12];
-	input[1] = inputs[(3*t+1)%12];
-	input[2] = inputs[(3*t+2)%12];
-	outexpected[0] = outputs[(3*t)%12];
-	outexpected[1] = outputs[(3*t+1)%12];
-	outexpected[2] = outputs[(3*t+2)%12];
-	product(input, wIH, hidden, nbInput, nbInput+1);
-	product(hidden, wHO, output, nbOutput, nbHidden+1);
-	DeltaOutput(outputDelta, output, outexpected, nbOutput );
-	deltaproduct(productDelta, wHO, outputDelta, nbOutput, nbHidden+1);
-	DeltaHidden(deltaHidden, productDelta, hidden, nbInput);
-	newWeight(wHO , hidden, outputDelta, 0.3, nbOutput, nbHidden+1);
-	newWeight(wIH , input, deltaHidden, 0.3, nbHidden, nbInput+1);
-	}
-
-	for (int i = 0 ; i < 4 ; ++i)
-	{
-	input[0] = inputs[i%3];
-	input[1] = inputs[i*3+1];
-	input[2] = inputs[i*3+2];
-	product(input, wIH, hidden, nbInput, nbHidden+1);
-	product(hidden, wHO, output, nbOutput, nbHidden+1);
-	printf("%f - %f - %f  = ",input[0], input[1], input[2]);
-	printf("%i - %i - %i", output[0]>0.5?1:0 , output[1]>0.5?1:0,
-	output[2]>0.5?1:0);
-	printf("\n");
-
-}
-free(input);
-free(outexpected);
-free(output);
-free(hidden);
-free(wIH);
-free(wHO);
-free(outputDelta);
-free(productDelta);
-free(deltaHidden);
-return 0;
-*/
-//}
-/*
-	int main(int argc, char* argv[])
-	{
-	int nbInput = 2;
-	int nbOutput = 1;
-	int nbHidden = 2;
-	float *input = calloc(nbInput , sizeof(float));
-	float inputs[] = { 1, 1, 0, 0, 0, 1, 1, 0 };
-	float outputs[] = { 0, 0, 1, 1 };
-	float *outexpected = calloc(nbOutput , sizeof(float));
-	float *output = calloc(nbOutput , sizeof(float));
-	float *hidden = calloc(nbHidden , sizeof(float));
-	float *wIH = calloc(nbHidden * (nbInput+1) , sizeof(float));
-
-	float *wHO = calloc(nbOutput * (nbHidden+1) , sizeof(float));
-
-	initWeight(wIH, nbHidden, nbInput+1);
-	initWeight(wHO, nbOutput, nbHidden+1);
-//		printf("wIH\n");
-//		printMatrix(wIH, nbHidden, nbInput+1);
-//		printf("wHO\n");
-//		printMatrix(wHO, nbOutput, nbHidden+1);
-float *outputDelta = calloc(nbOutput , sizeof(float));
-float *productDelta = calloc(2 , sizeof(float));
-float *deltaHidden = calloc( 2, sizeof(float));
- */
-/*=======================Training loop======================*/
-/*
-	for (int t = 0 ; t < 100000 ; ++t)
-	{
-
-	input[0] = inputs[2*(t%4)];
-	input[1] = inputs[2*(t%4)+1];
-//				printf("imput\n");
-//				printMatrix(input, 2,1);
-outexpected[0] = outputs[t%4];
-//				printf("outexpected\n");
-//				printMatrix(outexpected, 1,1);
-product(input, wIH, hidden, nbInput, nbInput+1);
-//				printf("Hidden\n");
-product(hidden, wHO, output, nbOutput, nbHidden+1);
-//				printMatrix(hidden,2,1);
-//				printf("output\n");
-//				printMatrix(output, 1,1);
-DeltaOutput(outputDelta, output, outexpected, nbOutput );
-//				printf("Outputdelta\n");
-//				printMatrix(outputDelta, 1,1);
-deltaproduct(productDelta, wHO, outputDelta, nbOutput, nbHidden+1);
-//				printf("ProductDelta\n");
-//				printMatrix(productDelta, 1,2);
-DeltaHidden(deltaHidden, productDelta, hidden, nbInput);
-//				printf("deltaHidden");
-//				printMatrix(deltaHidden, nbHidden, nbInput);
-newWeight(wHO , hidden, outputDelta, 0.3, nbOutput, nbHidden+1);
-
-newWeight(wIH , input, deltaHidden, 0.3, nbHidden, nbInput+1);
-
-//				printf("wIH\n");
-//				printMatrix(wIH, nbHidden, nbInput+1);
-//				printf("wHO\n");
-//				printMatrix(wHO, nbOutput, nbHidden+1);
-}
- */	/*===================End of training loop======================*/
-/*	if (argc == 1)
-	{
-	input[0] = 1;
-	input[1] = 1;
-	product(input, wIH, hidden, 2,3);
-	product(hidden, wHO, output, 1, 3);
-	printf("\n%f XOR %f = %f\n",input[0],input[1],
-	(output[0]));
-	printf("Gives \n%i XOR %i = %i\n",(int)input[0],(int)input[1],
-	(output[0]>0.5)?1:0);
-	input[0] = 0;
-	input[1] = 0;
-	product(input, wIH, hidden, 2,3);
-	product(hidden, wHO, output, 1, 3);
-	printf("\n%f XOR %f = %f\n",input[0],input[1],
-	(output[0]));
-	printf("Gives \n%i XOR %i = %i\n",(int)input[0],(int)input[1],
-	(output[0]>0.5)?1:0);
-	input[0] = 0;
-	input[1] = 1;
-	product(input, wIH, hidden, 2,3);
-	product(hidden, wHO, output, 1, 3);
-	printf("\n%f XOR %f = %f\n",input[0],input[1],
-	(output[0]));
-	printf("Gives \n%i XOR %i = %i\n",(int)input[0],(int)input[1],
-	(output[0]>0.5)?1:0);
-	input[0] = 1;
-	input[1] = 0;
-	product(input, wIH, hidden, 2,3);
-	product(hidden, wHO, output, 1, 3);
-	printf("\n%f XOR %f = %f\n",input[0],input[1],
-	(output[0]));
-	printf("Gives \n%i XOR %i = %i\n",(int)input[0],(int)input[1],
-	((output[0]>0.5)?1:0));
-	}
-	else
-	{
-	int x1, x2;
-	x1 = atoi(argv[1]);
-	x2 = atoi(argv[2]);
-
-	input[0] = x1;
-	input[1] = x2;
-	product(input, wIH, hidden, 2,3);
-	product(hidden, wHO, output, 1, 3);
-	printf(" \n%f XOR %f = %f\n",input[0],input[1],
-	(output[0]));
-	printf("Gives \n%i XOR %i = %i\n",(int)input[0],(int)input[1],
-	(output[0]>0.5)?1:0);
-	}
-	free(input);
-	free(outexpected);
-	free(output);
-	free(hidden);
-	free(wIH);
-	free(wHO);
-	free(outputDelta);
-	free(productDelta);
-	free(deltaHidden);
-	return 0;
-	}*/
-
