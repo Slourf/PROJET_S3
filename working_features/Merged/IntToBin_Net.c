@@ -401,7 +401,6 @@ char *single_forward (struct text *img)
 		++nbChar;
 	}
 
-	printf("Number of characters %i\n",nbChar);
 	char *carac = calloc(nbChar+2, sizeof(char));
 	for (size_t i = 0; i < img->size; ++i)
 	{
