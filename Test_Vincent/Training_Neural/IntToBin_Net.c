@@ -452,7 +452,7 @@ char *single_forward (struct text *img)
 int main()
 {
 	//training();
-	SDL_Surface * img = load_image("text.bmp");
+	SDL_Surface * img = load_image("../../working_features/Merged/just.bmp");
 	struct text *txt = cut(img);
 	char * string = single_forward(txt);
 	printf("%s\n", string);
