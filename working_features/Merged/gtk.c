@@ -47,7 +47,9 @@ void display_text_gtk(GtkButton *button, gpointer data) {
 				fputs(text, file);
 				fclose(file);
 			}
-			gtk_text_buffer_insert(d->buffer, &(d->iter),"***\nFinished\n***\nYour text has been saved in the file 'IRIS_text.txt'\n***\n", -1);
+			gtk_text_buffer_insert(d->buffer, &(d->iter),
+		"***\nFinished\n***\nYour text has been saved in the file 'IRIS_text.txt'\n***\n", -1);
+			free(text);
 		}
 		else {
             gtk_text_buffer_get_iter_at_mark(d->buffer, &(d->iter), d->mark);

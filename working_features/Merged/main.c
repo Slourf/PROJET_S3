@@ -7,7 +7,7 @@
 # include"pixel_operations.h"
 # include<SDL/SDL.h>
 # include<SDL/SDL_image.h>
-
+# include <math.h>
 # include "main.h"
 
 
@@ -364,35 +364,38 @@ struct tuple char_cut(struct matrix *mat)
 	    	if (w == 1) {
 				if (blank_count > aver_size_char + 1) {
 		   			++nbchar;
+					aver_size_char = (aver_size_char * (nbchar - 1) + x - x_top) / nbchar;
 		   			list = realloc(list, nbchar * sizeof(struct coord));
 		   			list[nbchar - 1].x = x_top + blank_count - 1;
 		   			list[nbchar - 1].y = x;
 		   			blank_count = 0;
-					not_first = 1;
 				}
+				not_first = 1;
 				x_top = x;
             	w = 0;
             }
-	    	if (x + 1 == mat->w){
+	    	else if (x + 1 == mat->w){
 	       		++nbchar;
 	       		aver_size_char = (aver_size_char * (nbchar - 1) + x - x_top) / nbchar;
 	       		list = realloc(list, nbchar * sizeof(struct coord));
                	list[nbchar - 1].x = x_top;
                	list[nbchar - 1].y = x - 1;
             }
-        	b = 1;
+			b = 1;
     	}
     	else {
 			++blank_count;
-			if (blank_count > aver_size_char + 1 && not_first) {
+			if (blank_count > aver_size_char + 2 && not_first) {
 				++nbchar;
+				aver_size_char = (aver_size_char * (nbchar - 1) + x - x_top) / nbchar;
 				list = realloc(list, nbchar * sizeof (struct coord));
 				list[nbchar - 1].x = x_top + blank_count - 1;
 				list[nbchar - 1].y = x;
 				blank_count = 0;
+				x_top = x;
 			}
 
-			if (b == 1) {
+			else if (b == 1) {
 				++nbchar;
 				aver_size_char = (aver_size_char * (nbchar - 1) + x - x_top) / nbchar;
             	list = realloc(list, nbchar * sizeof(struct coord));
@@ -400,6 +403,7 @@ struct tuple char_cut(struct matrix *mat)
             	list[nbchar - 1].y = x;
 				blank_count = 0;
             	b = 0;
+				x_top = x;
         	}
         	w = 1;
     	}
