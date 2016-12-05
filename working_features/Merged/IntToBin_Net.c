@@ -359,9 +359,9 @@ char *single_forward (struct text *img)
 				}
 			}
 			int count = 0 ;
-			while (count<15*15 && input[count]==0.0)
+			while (count<14*15+1 && input[count]==0.0)
 				++count;
-			if (count == 15*15){
+			if (count == 14*15+1){
 				carac[index_result] = ' ';
 				++index_result;
 			}
@@ -382,7 +382,6 @@ char *single_forward (struct text *img)
 		carac[index_result] = '\n';
 		++index_result;
 	}
-//	writeFileChar("Out.txt",carac, nbChar);
 	free(input);
 	free(output);
 	free(hidden);
