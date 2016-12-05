@@ -29,22 +29,22 @@ struct text {
     size_t size;
 };
 
-struct block {    
-        size_t Xori, Yori, w, h;    
-        struct block *next;    
-};    
-    
-struct matrix {    
-        long **data;    
-        size_t h;    
-        size_t w;    
-};    
-    
-struct lines {    
-        struct matrix **mat;    
-        int *Xori, *Yori;    
-        size_t size;    
-};    
+struct block {
+        size_t Xori, Yori, w, h;
+        struct block *next;
+};
+
+struct matrix {
+        long **data;
+        size_t h;
+        size_t w;
+};
+
+struct lines {
+        struct matrix **mat;
+        int *Xori, *Yori;
+        size_t size;
+};
 
 struct line {
 	struct matrix **mat;
@@ -70,11 +70,13 @@ void free_line(struct line *l);
 void free_text(struct text *text);
 
 struct tTuple block_cut (struct matrix *mat);
-void copy(struct matrix *old_mat, struct matrix *new_mat, int x_l, int x_u, int y_u);
+void copy(struct matrix *old_mat, struct matrix *new_mat, int x_l,
+int x_u, int y_u);
 struct tuple line_cut(struct matrix *mat);
 struct tuple char_cut(struct matrix *mat);
 void stock_lines(struct line *line, struct matrix *img, struct tuple coord);
-void stock_char(struct text *text, struct line *line, struct tuple nb_line, int char_size);
+void stock_char(struct text *text, struct line *line, struct tuple nb_line,
+int char_size);
 struct text *cut(SDL_Surface *img);
 
 
@@ -82,17 +84,19 @@ struct text *cut(SDL_Surface *img);
 ///////////////////RLSA//////////////////////
 /////////////////////////////////////////////
 
-struct matrix* init_matrix(size_t w, size_t h); 
-struct lines* init_lines(size_t size);  
-void rlsa_vec(struct matrix *ori, struct matrix *mat, int c); 
-void rlsa_hor(struct matrix *ori, struct matrix *mat, int c); 
-void rlsa_merge(struct matrix *mat_img, struct matrix *mat_vec, struct matrix *mat_hor); 
+struct matrix* init_matrix(size_t w, size_t h);
+struct lines* init_lines(size_t size);
+void rlsa_vec(struct matrix *ori, struct matrix *mat, int c);
+void rlsa_hor(struct matrix *ori, struct matrix *mat, int c);
+void rlsa_merge(struct matrix *mat_img, struct matrix *mat_vec,
+struct matrix *mat_hor);
 struct block* append_block(struct block *block, struct block *new);
 struct lines* stock_lines_rlsa(struct matrix *img, struct tuple coord) ;
-struct block* block_rlsa_cut(struct matrix *matrix, struct block* list, int x, int y);
-void display(struct matrix *mat); 
-    
-void rlsa(SDL_Surface *img, struct matrix *mat); 
+struct block* block_rlsa_cut(struct matrix *matrix, struct block* list,
+int x, int y);
+void display(struct matrix *mat);
+
+void rlsa(SDL_Surface *img, struct matrix *mat);
 
 ///////////////////////////////////////////////
 ///////////////////Resize//////////////////////

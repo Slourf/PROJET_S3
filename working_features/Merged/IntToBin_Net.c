@@ -441,7 +441,7 @@ char *single_forward (struct text *img)
 		carac[index_result] = '\n';
 		++index_result;
 	}
-	writeFileChar("Out.txt",carac, nbChar);
+//	writeFileChar("Out.txt",carac, nbChar);
 	free(input);
 	free(output);
 	free(hidden);
@@ -548,96 +548,6 @@ free(deltaHidden);
 return 0;
 */
 //}
-
-/*		printf("%i = ",(int)input[0]);
-		for (int j = 0 ; j < 4; ++j)
-		{
-		printf("%f ", (outexpected[j]));
-//	printf("%i", (output[j]>0.5)?1:0);
-}
-printf("\n");
- */
-//}
-
-/*===================End of training loop======================*/
-/*	if (argc == 1)
-	{
-	for (int i = 0 ; i < 8 ; ++i)
-	{
-	input[0] = inputs[i%8];
-	product(input, wIH, hidden, nbInput, nbHidden+1);
-	product(hidden, wHO, output, nbOutput, nbHidden+1);
-	printf("%i = ",(int)input[0]);
-	for (int j = 0 ; j < 4; ++j)
-	{
-	printf("%f ", (output[j]));
-//	printf("%i", (output[j]>0.5)?1:0);
-}
-printf("\n");
-
-}*/
-
-/*	input[0] = 1;
-	input[1] = 1;
-	product(input, wIH, hidden, 2,3);
-	product(hidden, wHO, output, 1, 3);
-	printf("\n%f XOR %f = %f\n",input[0],input[1],
-	(output[0]));
-	printf("Gives \n%i XOR %i = %i\n",(int)input[0],(int)input[1],
-	(output[0]>0.5)?1:0);
-	input[0] = 0;
-	input[1] = 0;
-	product(input, wIH, hidden, 2,3);
-	product(hidden, wHO, output, 1, 3);
-	printf("\n%f XOR %f = %f\n",input[0],input[1],
-	(output[0]));
-	printf("Gives \n%i XOR %i = %i\n",(int)input[0],(int)input[1],
-	(output[0]>0.5)?1:0);
-	input[0] = 0;
-	input[1] = 1;
-	product(input, wIH, hidden, 2,3);
-	product(hidden, wHO, output, 1, 3);
-	printf("\n%f XOR %f = %f\n",input[0],input[1],
-	(output[0]));
-	printf("Gives \n%i XOR %i = %i\n",(int)input[0],(int)input[1],
-	(output[0]>0.5)?1:0);
-	input[0] = 1;
-	input[1] = 0;
-	product(input, wIH, hidden, 2,3);
-	product(hidden, wHO, output, 1, 3);
-	printf("\n%f XOR %f = %f\n",input[0],input[1],
-	(output[0]));
-	printf("Gives \n%i XOR %i = %i\n",(int)input[0],(int)input[1],
-	((output[0]>0.5)?1:0));
- */
-/*	}
-	else
-	{
-	int x1, x2;
-	x1 = atoi(argv[1]);
-	x2 = atoi(argv[2]);
-
-	input[0] = x1;
-	input[1] = x2;
-	product(input, wIH, hidden, 2,3);
-	product(hidden, wHO, output, 1, 3);
-	printf(" \n%f XOR %f = %f\n",input[0],input[1],
-	(output[0]));
-	printf("Gives \n%i XOR %i = %i\n",(int)input[0],(int)input[1],
-	(output[0]>0.5)?1:0);
-	}
-	free(input);
-	free(outexpected);
-	free(output);
-	free(hidden);
-	free(wIH);
-	free(wHO);
-	free(outputDelta);
-	free(productDelta);
-	free(deltaHidden);
-	return 0;
-	}*/
-
 /*
 	int main(int argc, char* argv[])
 	{
